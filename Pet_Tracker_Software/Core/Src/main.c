@@ -439,6 +439,7 @@ static void MX_GPIO_Init(void)
   * @retval None
   */
 /* USER CODE END Header_StartDefaultTask */
+uint8_t data[] = "Labadiena jums\n";
 void StartDefaultTask(void *argument)
 {
   /* USER CODE BEGIN 5 */
@@ -446,6 +447,7 @@ void StartDefaultTask(void *argument)
   for(;;)
   {
     HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
+    HAL_UART_Transmit_IT(&huart1, data, sizeof(data)-1);
     osDelay(500);
   }
   /* USER CODE END 5 */

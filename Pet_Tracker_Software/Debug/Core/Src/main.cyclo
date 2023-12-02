@@ -5,6 +5,6 @@ main.c:255:13:MX_I2C2_Init	4
 main.c:303:13:MX_USART1_UART_Init	2
 main.c:338:13:MX_USART2_UART_Init	2
 main.c:373:13:MX_GPIO_Init	1
-main.c:442:6:StartDefaultTask	1
-main.c:462:6:HAL_TIM_PeriodElapsedCallback	2
-main.c:479:6:Error_Handler	1
+main.c:443:6:StartDefaultTask	1
+main.c:464:6:HAL_TIM_PeriodElapsedCallback	2
+main.c:481:6:Error_Handler	1
