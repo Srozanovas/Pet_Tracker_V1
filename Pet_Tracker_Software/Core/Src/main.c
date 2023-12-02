@@ -22,7 +22,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-//#include "EEPROM.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -74,7 +74,6 @@ void StartDefaultTask(void *argument);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
- uint8_t data[]="Myliu pupa uoga Aistute <3\n";
 /* USER CODE END 0 */
 
 /**
@@ -154,7 +153,6 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-
   }
   /* USER CODE END 3 */
 }
@@ -447,9 +445,8 @@ void StartDefaultTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
-	  HAL_UART_Transmit_IT(&huart1, data, sizeof(data));
-	  HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
-    osDelay(300);
+    HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
+    osDelay(500);
   }
   /* USER CODE END 5 */
 }

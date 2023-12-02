@@ -38,34 +38,34 @@ $(wildcard ../makefile.init) \
 $(wildcard ../makefile.targets) \
 
 
-BUILD_ARTIFACT_NAME := Pet_tracker_mb
+BUILD_ARTIFACT_NAME := Pet_Tracker
 BUILD_ARTIFACT_EXTENSION := elf
 BUILD_ARTIFACT_PREFIX :=
 BUILD_ARTIFACT := $(BUILD_ARTIFACT_PREFIX)$(BUILD_ARTIFACT_NAME)$(if $(BUILD_ARTIFACT_EXTENSION),.$(BUILD_ARTIFACT_EXTENSION),)
 
 # Add inputs and outputs from these tool invocations to the build variables 
 EXECUTABLES += \
-Pet_tracker_mb.elf \
+Pet_Tracker.elf \
 
 MAP_FILES += \
-Pet_tracker_mb.map \
+Pet_Tracker.map \
 
 SIZE_OUTPUT += \
 default.size.stdout \
 
 OBJDUMP_LIST += \
-Pet_tracker_mb.list \
+Pet_Tracker.list \
 
 
 # All Target
 all: main-build
 
 # Main-build Target
-main-build: Pet_tracker_mb.elf secondary-outputs
+main-build: Pet_Tracker.elf secondary-outputs
 
 # Tool invocations
-Pet_tracker_mb.elf Pet_tracker_mb.map: $(OBJS) $(USER_OBJS) D:\Altiumo_Projektai\3.\ Pet_Tracker\SoftWare\Pet_Tracker_MB\Pet_tracker_mb\STM32L433RCTXP_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "Pet_tracker_mb.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"D:\Altiumo_Projektai\3. Pet_Tracker\SoftWare\Pet_Tracker_MB\Pet_tracker_mb\STM32L433RCTXP_FLASH.ld" --specs=nosys.specs -Wl,-Map="Pet_tracker_mb.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Pet_Tracker.elf Pet_Tracker.map: $(OBJS) $(USER_OBJS) D:\Altiumo_Projektai\3.\ Pet_Tracker\Final\Pet_Tracker\Pet_Tracker_Software\STM32L433RCTXP_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "Pet_Tracker.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"D:\Altiumo_Projektai\3. Pet_Tracker\Final\Pet_Tracker\Pet_Tracker_Software\STM32L433RCTXP_FLASH.ld" --specs=nosys.specs -Wl,-Map="Pet_Tracker.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
@@ -74,14 +74,14 @@ default.size.stdout: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
 	@echo 'Finished building: $@'
 	@echo ' '
 
-Pet_tracker_mb.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "Pet_tracker_mb.list"
+Pet_Tracker.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "Pet_Tracker.list"
 	@echo 'Finished building: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) Pet_tracker_mb.elf Pet_tracker_mb.list Pet_tracker_mb.map default.size.stdout
+	-$(RM) Pet_Tracker.elf Pet_Tracker.list Pet_Tracker.map default.size.stdout
 	-@echo ' '
 
 secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST)
