@@ -1,43 +1,41 @@
-// /**********************************************************************************************************************
-//  * Includes
-//  *********************************************************************************************************************/
-// #include "gpio_driver.h"
+/**********************************************************************************************************************
+ * Includes
+ *********************************************************************************************************************/
+#include "gpio_driver.h"
+#include "main.h"
 
-// //#include  "debug_api.h"
-// /**********************************************************************************************************************
-//  * Private definitions and macros
-//  *********************************************************************************************************************/
-// //DEBUG_MODULE(GPIO_DRIVER);
-// /**********************************************************************************************************************
-//  * Private typedef
-//  *********************************************************************************************************************/
+//#include  "debug_api.h"
+/**********************************************************************************************************************
+ * Private definitions and macros
+ *********************************************************************************************************************/
+//DEBUG_MODULE(GPIO_DRIVER);
+/**********************************************************************************************************************
+ * Private typedef
+ *********************************************************************************************************************/
 
-// typedef enum eGpioInterupt_t {
-//     eGpioInteruptFirst = 0,
-//     eGpioInteruptAccelerometer = eGpioInteruptFirst,
-//     eGpioInteruptLast
-// }eGpioInterupt_t;
+typedef enum eGpioInterupt_t {
+    eGpioInteruptFirst = 0,
+    eGpioInteruptAccelerometer = eGpioInteruptFirst,
+    eGpioInteruptLast
+}eGpioInterupt_t;
 
-// typedef enum eGpioExternal_t {
-//         eGpioExternal,
-//         eGpioNotExternal,
-// }eGpioExternal_t ;
-
-
+typedef enum eGpioExternal_t {
+        eGpioExternal,
+        eGpioNotExternal,
+}eGpioExternal_t ;
 
 
-// typedef struct sGpioDesc_t {
-//     GPIO_TypeDef *port;
-//     uint32_t pin;
-//     uint32_t mode;
-//     uint32_t speed;
-//     uint32_t output;
-//     uint32_t pull;
-//     uint32_t clock;
-//     uint32_t alternate;
-//     eGpioExternal_t interupt_enable;
-//     eGpioInterupt_t interupt;
-// } sGpioDesc_t;
+
+
+typedef struct sGpioDesc_t {
+    GPIO_TypeDef *port;
+    uint32_t pin;
+    uint32_t mode;
+    uint32_t speed;
+    uint32_t pull;
+    uint32_t clock;
+    eGpioInterupt_t interupt;
+} sGpioDesc_t;
 
 // typedef struct sGPioExternalDesc_t {
 //     uint32_t line031;
@@ -51,22 +49,24 @@
 //     bool (*function_pointer)(void);
 // }sGPioExternalDesc_t;
 
-// /**********************************************************************************************************************
-//  * Private constants
-//  *********************************************************************************************************************/
-// // const static sGpioDesc_t gpio_desc_lut[] = {
-// // 	    [eGpioDriverUartDebugTX]  = {.port = GPIOA, .pin = LL_GPIO_PIN_2,  .mode = LL_GPIO_MODE_ALTERNATE, .speed = LL_GPIO_SPEED_FREQ_VERY_HIGH, .output = LL_GPIO_OUTPUT_PUSHPULL,  .pull = LL_GPIO_PULL_NO, .clock = LL_AHB2_GRP1_PERIPH_GPIOA, .alternate = LL_GPIO_AF_7, .interupt_enable = eGpioNotExternal},
-// // 	    [eGpioDriverUartDebugRX]  = {.port = GPIOA, .pin = LL_GPIO_PIN_3,  .mode = LL_GPIO_MODE_ALTERNATE, .speed = LL_GPIO_SPEED_FREQ_VERY_HIGH, .output = LL_GPIO_OUTPUT_PUSHPULL,  .pull = LL_GPIO_PULL_NO, .clock = LL_AHB2_GRP1_PERIPH_GPIOA, .alternate = LL_GPIO_AF_7, .interupt_enable = eGpioNotExternal },
-// // 		[eGpioDriverUartModemTX]  = {.port = GPIOA, .pin = LL_GPIO_PIN_9,  .mode = LL_GPIO_MODE_ALTERNATE, .speed = LL_GPIO_SPEED_FREQ_VERY_HIGH, .output = LL_GPIO_OUTPUT_PUSHPULL,  .pull = LL_GPIO_PULL_NO, .clock = LL_AHB2_GRP1_PERIPH_GPIOA, .alternate = LL_GPIO_AF_7, .interupt_enable = eGpioNotExternal},
-// // 		[eGpioDriverUartModemRX]  = {.port = GPIOA, .pin = LL_GPIO_PIN_10, .mode = LL_GPIO_MODE_ALTERNATE, .speed = LL_GPIO_SPEED_FREQ_VERY_HIGH, .output = LL_GPIO_OUTPUT_PUSHPULL,  .pull = LL_GPIO_PULL_NO, .clock = LL_AHB2_GRP1_PERIPH_GPIOA, .alternate = LL_GPIO_AF_7, .interupt_enable = eGpioNotExternal},
-// // 		[eGpioDriverUartGNSSTX]   = {.port = GPIOC, .pin = LL_GPIO_PIN_4,  .mode = LL_GPIO_MODE_ALTERNATE, .speed = LL_GPIO_SPEED_FREQ_VERY_HIGH, .output = LL_GPIO_OUTPUT_PUSHPULL,  .pull = LL_GPIO_PULL_NO, .clock = LL_AHB2_GRP1_PERIPH_GPIOC, .alternate = LL_GPIO_AF_7, .interupt_enable = eGpioNotExternal},
-// // 		[eGpioDriverUartGNSSRX]   = {.port = GPIOC, .pin = LL_GPIO_PIN_11, .mode = LL_GPIO_MODE_ALTERNATE, .speed = LL_GPIO_SPEED_FREQ_VERY_HIGH, .output = LL_GPIO_OUTPUT_PUSHPULL,  .pull = LL_GPIO_PULL_NO, .clock = LL_AHB2_GRP1_PERIPH_GPIOB, .alternate = LL_GPIO_AF_7, .interupt_enable = eGpioNotExternal},
-// // 		[eGpioDriverI2CEepromSCL] = {.port = GPIOB, .pin = LL_GPIO_PIN_6,  .mode = LL_GPIO_MODE_ALTERNATE, .speed = LL_GPIO_SPEED_FREQ_VERY_HIGH, .output = LL_GPIO_OUTPUT_OPENDRAIN, .pull = LL_GPIO_PULL_NO, .clock = LL_AHB2_GRP1_PERIPH_GPIOB, .alternate = LL_GPIO_AF_4, .interupt_enable = eGpioNotExternal},
-// // 	    [eGpioDriverI2CEepromSDA] = {.port = GPIOB, .pin = LL_GPIO_PIN_7,  .mode = LL_GPIO_MODE_ALTERNATE, .speed = LL_GPIO_SPEED_FREQ_VERY_HIGH, .output = LL_GPIO_OUTPUT_OPENDRAIN, .pull = LL_GPIO_PULL_NO, .clock = LL_AHB2_GRP1_PERIPH_GPIOB, .alternate = LL_GPIO_AF_4, .interupt_enable = eGpioNotExternal},
-// // 	    [eGpioDriverI2CAcceSCL]   = {.port = GPIOB, .pin = LL_GPIO_PIN_10, .mode = LL_GPIO_MODE_ALTERNATE, .speed = LL_GPIO_SPEED_FREQ_VERY_HIGH, .output = LL_GPIO_OUTPUT_OPENDRAIN, .pull = LL_GPIO_PULL_UP, .clock = LL_AHB2_GRP1_PERIPH_GPIOB, .alternate = LL_GPIO_AF_4, .interupt_enable = eGpioNotExternal},
-// // 	    [eGpioDriverI2CAcceSDA]   = {.port = GPIOB, .pin = LL_GPIO_PIN_11, .mode = LL_GPIO_MODE_ALTERNATE, .speed = LL_GPIO_SPEED_FREQ_VERY_HIGH, .output = LL_GPIO_OUTPUT_OPENDRAIN, .pull = LL_GPIO_PULL_UP, .clock = LL_AHB2_GRP1_PERIPH_GPIOB, .alternate = LL_GPIO_AF_4, .interupt_enable = eGpioNotExternal},
-// // 	    [eGpioDriverAcceInterupt] = {.port = GPIOC, .pin = LL_GPIO_PIN_9,  .mode = LL_GPIO_MODE_INPUT,     .pull  = LL_GPIO_PULL_NO,   .interupt_enable = eGpioExternal, .interupt = eGpioInteruptAccelerometer,.clock = LL_AHB2_GRP1_PERIPH_GPIOC}
-// // };
+/**********************************************************************************************************************
+ * Private constants
+*********************************************************************************************************************/
+
+const static sGpioDesc_t gpio_desc_lut[] = {
+    //[eGpioDriverUartDebugTX]    = {.port = GPIOB, .pin = LL_GPIO_PIN_2,  .mode = LL_GPIO_MODE_ALTERNATE, .speed = LL_GPIO_SPEED_FREQ_VERY_HIGH, .output = LL_GPIO_OUTPUT_PUSHPULL,  .pull = LL_GPIO_PULL_NO, .clock = LL_AHB2_GRP1_PERIPH_GPIOA, .alternate = LL_GPIO_AF_7, .interupt_enable = eGpioNotExternal},
+    //[eGpioDriverUartDebugRX]    = {.port = GPIOB, .pin = LL_GPIO_PIN_3,  .mode = LL_GPIO_MODE_ALTERNATE, .speed = LL_GPIO_SPEED_FREQ_VERY_HIGH, .output = LL_GPIO_OUTPUT_PUSHPULL,  .pull = LL_GPIO_PULL_NO, .clock = LL_AHB2_GRP1_PERIPH_GPIOA, .alternate = LL_GPIO_AF_7, .interupt_enable = eGpioNotExternal },
+    //[eGpioDriverUartModemTX]  = {.port = GPIOA, .pin = LL_GPIO_PIN_9,  .mode = LL_GPIO_MODE_ALTERNATE, .speed = LL_GPIO_SPEED_FREQ_VERY_HIGH, .output = LL_GPIO_OUTPUT_PUSHPULL,  .pull = LL_GPIO_PULL_NO, .clock = LL_AHB2_GRP1_PERIPH_GPIOA, .alternate = LL_GPIO_AF_7, .interupt_enable = eGpioNotExternal},
+    //[eGpioDriverUartModemRX]  = {.port = GPIOA, .pin = LL_GPIO_PIN_10, .mode = LL_GPIO_MODE_ALTERNATE, .speed = LL_GPIO_SPEED_FREQ_VERY_HIGH, .output = LL_GPIO_OUTPUT_PUSHPULL,  .pull = LL_GPIO_PULL_NO, .clock = LL_AHB2_GRP1_PERIPH_GPIOA, .alternate = LL_GPIO_AF_7, .interupt_enable = eGpioNotExternal},
+    //[eGpioDriverUartGNSSTX]   = {.port = GPIOC, .pin = LL_GPIO_PIN_4,  .mode = LL_GPIO_MODE_ALTERNATE, .speed = LL_GPIO_SPEED_FREQ_VERY_HIGH, .output = LL_GPIO_OUTPUT_PUSHPULL,  .pull = LL_GPIO_PULL_NO, .clock = LL_AHB2_GRP1_PERIPH_GPIOC, .alternate = LL_GPIO_AF_7, .interupt_enable = eGpioNotExternal},
+    //[eGpioDriverUartGNSSRX]   = {.port = GPIOC, .pin = LL_GPIO_PIN_11, .mode = LL_GPIO_MODE_ALTERNATE, .speed = LL_GPIO_SPEED_FREQ_VERY_HIGH, .output = LL_GPIO_OUTPUT_PUSHPULL,  .pull = LL_GPIO_PULL_NO, .clock = LL_AHB2_GRP1_PERIPH_GPIOB, .alternate = LL_GPIO_AF_7, .interupt_enable = eGpioNotExternal},
+    //[eGpioDriverI2CEepromSCL] = {.port = GPIOB, .pin = LL_GPIO_PIN_6,  .mode = LL_GPIO_MODE_ALTERNATE, .speed = LL_GPIO_SPEED_FREQ_VERY_HIGH, .output = LL_GPIO_OUTPUT_OPENDRAIN, .pull = LL_GPIO_PULL_NO, .clock = LL_AHB2_GRP1_PERIPH_GPIOB, .alternate = LL_GPIO_AF_4, .interupt_enable = eGpioNotExternal},
+    //[eGpioDriverI2CEepromSDA] = {.port = GPIOB, .pin = LL_GPIO_PIN_7,  .mode = LL_GPIO_MODE_ALTERNATE, .speed = LL_GPIO_SPEED_FREQ_VERY_HIGH, .output = LL_GPIO_OUTPUT_OPENDRAIN, .pull = LL_GPIO_PULL_NO, .clock = LL_AHB2_GRP1_PERIPH_GPIOB, .alternate = LL_GPIO_AF_4, .interupt_enable = eGpioNotExternal},
+    //[eGpioDriverI2CAcceSCL]   = {.port = GPIOB, .pin = LL_GPIO_PIN_10, .mode = LL_GPIO_MODE_ALTERNATE, .speed = LL_GPIO_SPEED_FREQ_VERY_HIGH, .output = LL_GPIO_OUTPUT_OPENDRAIN, .pull = LL_GPIO_PULL_UP, .clock = LL_AHB2_GRP1_PERIPH_GPIOB, .alternate = LL_GPIO_AF_4, .interupt_enable = eGpioNotExternal},
+    //[eGpioDriverI2CAcceSDA]   = {.port = GPIOB, .pin = LL_GPIO_PIN_11, .mode = LL_GPIO_MODE_ALTERNATE, .speed = LL_GPIO_SPEED_FREQ_VERY_HIGH, .output = LL_GPIO_OUTPUT_OPENDRAIN, .pull = LL_GPIO_PULL_UP, .clock = LL_AHB2_GRP1_PERIPH_GPIOB, .alternate = LL_GPIO_AF_4, .interupt_enable = eGpioNotExternal},
+    [eGpioDriverPB0]            = {.port = GPIOB, .pin = GPIO_PIN_0,    .mode = GPIO_MODE_OUTPUT_PP,    .pull = GPIO_NOPULL, .speed = GPIO_SPEED_FREQ_LOW, .speed = GPIO_SPEED_FREQ_LOW},
+    //[eGpioDriverAcceInterupt] = {.port = GPIOC, .pin = LL_GPIO_PIN_9,  .mode = LL_GPIO_MODE_INPUT,     .pull  = LL_GPIO_PULL_NO,   .interupt_enable = eGpioExternal, .interupt = eGpioInteruptAccelerometer,.clock = LL_AHB2_GRP1_PERIPH_GPIOC}
+};
 
 
 // // static sGPioExternalDesc_t  external_desc_lut[] = {

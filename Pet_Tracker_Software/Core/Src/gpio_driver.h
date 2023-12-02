@@ -3,7 +3,7 @@
 /**********************************************************************************************************************
  * Includes
  *********************************************************************************************************************/
-#include "main.h"
+
 #include "stdbool.h"
 #include "stdarg.h"
 
@@ -11,37 +11,40 @@
  * Exported definitions and macros
  *********************************************************************************************************************/
 typedef enum eGpioPin_t {
-        eGpioDriverPinFirst = 0,
-        eGpioDriverLedStatPin = eGpioDriverPinFirst,
-        eGpioDriverUartDebugTX,
-		eGpioDriverUartDebugRX,
-		eGpioDriverUartModemTX,
-		eGpioDriverUartModemRX,
-		eGpioDriverUartGNSSTX,
-		eGpioDriverUartGNSSRX,
-		eGpioDriverI2CEepromSCL,
-        eGpioDriverI2CEepromSDA,
-        eGpioDriverI2CAcceSCL,
-        eGpioDriverI2CAcceSDA,
-        eGpioDriverAcceInterupt,
-        eGpioDriverPinLast
-} eGpioPin_t;
+	eGpioDriverPinFirst = 0,
+	eGpioDriverLedStatPin = eGpioDriverPinFirst,
+	eGpioDriverUartDebugTX,
+	eGpioDriverUartDebugRX,
+	eGpioDriverUartModemTX,
+	eGpioDriverUartModemRX,
+	eGpioDriverModemEnable, 
+	eGpioDriverI2CEepromSCL,
+	eGpioDriverI2CEepromSDA,
+	eGpioDriverI2CAcceSCL,
+	eGpioDriverI2CAcceSDA,
+	eGpioDriverAcceInterupt,
+	eGpioDriverPA12,
+	eGpioDriverPB0,
+	eGpioDriverPB1,
+	eGpioDriverPB2,
+	eGpioDriverPinLast
+}eGpioPin_t;
 
 typedef enum eGpioPinState_t {
-        ePinOn,
-        ePinOff,
-        ePinLast
+	ePinOn,
+	ePinOff,
+	ePinLast
 } eGpioPinState_t;
 
 typedef enum eGpioPinStatus_t {
-    ePinHigh,
-        ePinLow,
-        ePinNaN
+	ePinHigh,
+	ePinLow,
+	ePinNaN
 } eGpioPinStatus_t;
 
 typedef enum eGpioAllPin_t {
-        eGpioAllPinsOK,
-        eGpioAllPinsNotOk
+	eGpioAllPinsOK,
+    eGpioAllPinsNotOk
 } eGpioAllPin_t;
 
 
