@@ -1,0 +1,10 @@
+{
+  "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+  "cmake.configureOnOpen": true,
+  "cmake.sourceDirectory": "D:/Altiumo_Projektai/3. Pet_Tracker/Final/Pet_Tracker/Pet_Tracker_Software",
+  "C_Cpp.default.defines": [
+    "DEBUG",
+    "USE_HAL_DRIVER",
+    "STM32L433"
+  ]
+}

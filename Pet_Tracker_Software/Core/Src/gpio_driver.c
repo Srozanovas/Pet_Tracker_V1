@@ -1,0 +1,255 @@
+// /**********************************************************************************************************************
+//  * Includes
+//  *********************************************************************************************************************/
+// #include "gpio_driver.h"
+
+// //#include  "debug_api.h"
+// /**********************************************************************************************************************
+//  * Private definitions and macros
+//  *********************************************************************************************************************/
+// //DEBUG_MODULE(GPIO_DRIVER);
+// /**********************************************************************************************************************
+//  * Private typedef
+//  *********************************************************************************************************************/
+
+// typedef enum eGpioInterupt_t {
+//     eGpioInteruptFirst = 0,
+//     eGpioInteruptAccelerometer = eGpioInteruptFirst,
+//     eGpioInteruptLast
+// }eGpioInterupt_t;
+
+// typedef enum eGpioExternal_t {
+//         eGpioExternal,
+//         eGpioNotExternal,
+// }eGpioExternal_t ;
+
+
+
+
+// typedef struct sGpioDesc_t {
+//     GPIO_TypeDef *port;
+//     uint32_t pin;
+//     uint32_t mode;
+//     uint32_t speed;
+//     uint32_t output;
+//     uint32_t pull;
+//     uint32_t clock;
+//     uint32_t alternate;
+//     eGpioExternal_t interupt_enable;
+//     eGpioInterupt_t interupt;
+// } sGpioDesc_t;
+
+// typedef struct sGPioExternalDesc_t {
+//     uint32_t line031;
+//     uint32_t line3263;
+//     FunctionalState command;
+//     uint8_t mode;
+//     uint8_t trigger;
+//     uint32_t interupt_port;
+//     uint32_t interupt_pin;
+//     IRQn_Type interupt_type;
+//     bool (*function_pointer)(void);
+// }sGPioExternalDesc_t;
+
+// /**********************************************************************************************************************
+//  * Private constants
+//  *********************************************************************************************************************/
+// // const static sGpioDesc_t gpio_desc_lut[] = {
+// // 	    [eGpioDriverUartDebugTX]  = {.port = GPIOA, .pin = LL_GPIO_PIN_2,  .mode = LL_GPIO_MODE_ALTERNATE, .speed = LL_GPIO_SPEED_FREQ_VERY_HIGH, .output = LL_GPIO_OUTPUT_PUSHPULL,  .pull = LL_GPIO_PULL_NO, .clock = LL_AHB2_GRP1_PERIPH_GPIOA, .alternate = LL_GPIO_AF_7, .interupt_enable = eGpioNotExternal},
+// // 	    [eGpioDriverUartDebugRX]  = {.port = GPIOA, .pin = LL_GPIO_PIN_3,  .mode = LL_GPIO_MODE_ALTERNATE, .speed = LL_GPIO_SPEED_FREQ_VERY_HIGH, .output = LL_GPIO_OUTPUT_PUSHPULL,  .pull = LL_GPIO_PULL_NO, .clock = LL_AHB2_GRP1_PERIPH_GPIOA, .alternate = LL_GPIO_AF_7, .interupt_enable = eGpioNotExternal },
+// // 		[eGpioDriverUartModemTX]  = {.port = GPIOA, .pin = LL_GPIO_PIN_9,  .mode = LL_GPIO_MODE_ALTERNATE, .speed = LL_GPIO_SPEED_FREQ_VERY_HIGH, .output = LL_GPIO_OUTPUT_PUSHPULL,  .pull = LL_GPIO_PULL_NO, .clock = LL_AHB2_GRP1_PERIPH_GPIOA, .alternate = LL_GPIO_AF_7, .interupt_enable = eGpioNotExternal},
+// // 		[eGpioDriverUartModemRX]  = {.port = GPIOA, .pin = LL_GPIO_PIN_10, .mode = LL_GPIO_MODE_ALTERNATE, .speed = LL_GPIO_SPEED_FREQ_VERY_HIGH, .output = LL_GPIO_OUTPUT_PUSHPULL,  .pull = LL_GPIO_PULL_NO, .clock = LL_AHB2_GRP1_PERIPH_GPIOA, .alternate = LL_GPIO_AF_7, .interupt_enable = eGpioNotExternal},
+// // 		[eGpioDriverUartGNSSTX]   = {.port = GPIOC, .pin = LL_GPIO_PIN_4,  .mode = LL_GPIO_MODE_ALTERNATE, .speed = LL_GPIO_SPEED_FREQ_VERY_HIGH, .output = LL_GPIO_OUTPUT_PUSHPULL,  .pull = LL_GPIO_PULL_NO, .clock = LL_AHB2_GRP1_PERIPH_GPIOC, .alternate = LL_GPIO_AF_7, .interupt_enable = eGpioNotExternal},
+// // 		[eGpioDriverUartGNSSRX]   = {.port = GPIOC, .pin = LL_GPIO_PIN_11, .mode = LL_GPIO_MODE_ALTERNATE, .speed = LL_GPIO_SPEED_FREQ_VERY_HIGH, .output = LL_GPIO_OUTPUT_PUSHPULL,  .pull = LL_GPIO_PULL_NO, .clock = LL_AHB2_GRP1_PERIPH_GPIOB, .alternate = LL_GPIO_AF_7, .interupt_enable = eGpioNotExternal},
+// // 		[eGpioDriverI2CEepromSCL] = {.port = GPIOB, .pin = LL_GPIO_PIN_6,  .mode = LL_GPIO_MODE_ALTERNATE, .speed = LL_GPIO_SPEED_FREQ_VERY_HIGH, .output = LL_GPIO_OUTPUT_OPENDRAIN, .pull = LL_GPIO_PULL_NO, .clock = LL_AHB2_GRP1_PERIPH_GPIOB, .alternate = LL_GPIO_AF_4, .interupt_enable = eGpioNotExternal},
+// // 	    [eGpioDriverI2CEepromSDA] = {.port = GPIOB, .pin = LL_GPIO_PIN_7,  .mode = LL_GPIO_MODE_ALTERNATE, .speed = LL_GPIO_SPEED_FREQ_VERY_HIGH, .output = LL_GPIO_OUTPUT_OPENDRAIN, .pull = LL_GPIO_PULL_NO, .clock = LL_AHB2_GRP1_PERIPH_GPIOB, .alternate = LL_GPIO_AF_4, .interupt_enable = eGpioNotExternal},
+// // 	    [eGpioDriverI2CAcceSCL]   = {.port = GPIOB, .pin = LL_GPIO_PIN_10, .mode = LL_GPIO_MODE_ALTERNATE, .speed = LL_GPIO_SPEED_FREQ_VERY_HIGH, .output = LL_GPIO_OUTPUT_OPENDRAIN, .pull = LL_GPIO_PULL_UP, .clock = LL_AHB2_GRP1_PERIPH_GPIOB, .alternate = LL_GPIO_AF_4, .interupt_enable = eGpioNotExternal},
+// // 	    [eGpioDriverI2CAcceSDA]   = {.port = GPIOB, .pin = LL_GPIO_PIN_11, .mode = LL_GPIO_MODE_ALTERNATE, .speed = LL_GPIO_SPEED_FREQ_VERY_HIGH, .output = LL_GPIO_OUTPUT_OPENDRAIN, .pull = LL_GPIO_PULL_UP, .clock = LL_AHB2_GRP1_PERIPH_GPIOB, .alternate = LL_GPIO_AF_4, .interupt_enable = eGpioNotExternal},
+// // 	    [eGpioDriverAcceInterupt] = {.port = GPIOC, .pin = LL_GPIO_PIN_9,  .mode = LL_GPIO_MODE_INPUT,     .pull  = LL_GPIO_PULL_NO,   .interupt_enable = eGpioExternal, .interupt = eGpioInteruptAccelerometer,.clock = LL_AHB2_GRP1_PERIPH_GPIOC}
+// // };
+
+
+// // static sGPioExternalDesc_t  external_desc_lut[] = {
+// //         [eGpioInteruptAccelerometer] = {.line031 = LL_EXTI_LINE_9, .line3263 = LL_EXTI_LINE_NONE, .command = ENABLE, .mode = LL_EXTI_MODE_IT, .trigger =  LL_EXTI_TRIGGER_RISING, .interupt_port = LL_SYSCFG_EXTI_PORTC, .interupt_pin = LL_SYSCFG_EXTI_LINE9, .interupt_type = EXTI9_5_IRQn, .function_pointer=NULL }
+// // };
+
+
+
+
+
+
+
+
+// /**********************************************************************************************************************
+//  * Private variables
+//  *********************************************************************************************************************/
+
+// /**********************************************************************************************************************
+//  * Exported variables and references
+//  *********************************************************************************************************************/
+
+// /**********************************************************************************************************************
+//  * Prototypes of private functions
+//  *********************************************************************************************************************/
+// bool GPIO_Driver_ExternalInterupt(eGpioInterupt_t gpio_interupt, eGpioPin_t gpio_pin, bool(*function)(void));
+// /**********************************************************************************************************************
+//  * Definitions of private functions
+//  *********************************************************************************************************************/
+// bool GPIO_Driver_Init (eGpioPin_t gpio_pin, ...) {
+//     va_list args;
+//     va_start(args, gpio_pin);
+
+
+//     if (gpio_pin >= eGpioDriverPinLast) {
+//         return false;
+//     }
+
+
+
+//     LL_GPIO_InitTypeDef gpio_init_struct = {0};
+//     LL_GPIO_ResetOutputPin(gpio_desc_lut[gpio_pin].port, gpio_desc_lut[gpio_pin].pin);
+//     LL_AHB2_GRP1_EnableClock(gpio_desc_lut[gpio_pin].clock);
+//     if (gpio_desc_lut[gpio_pin].interupt_enable == eGpioExternal) {
+//         if (GPIO_Driver_ExternalInterupt(gpio_desc_lut[gpio_pin].interupt, gpio_pin,(bool(*)(void)) va_arg(args, bool*)) != true){
+//             va_end(args);
+//             return false;
+
+//         }
+//         va_end(args);
+//         return true;
+//     }
+//     va_end(args);
+//     gpio_init_struct.Pin = gpio_desc_lut[gpio_pin].pin;
+//     gpio_init_struct.Mode = gpio_desc_lut[gpio_pin].mode;
+//     gpio_init_struct.Speed = gpio_desc_lut[gpio_pin].speed;
+//     gpio_init_struct.OutputType = gpio_desc_lut[gpio_pin].output;
+//     gpio_init_struct.Pull = gpio_desc_lut[gpio_pin].pull;
+//     gpio_init_struct.Alternate = gpio_desc_lut[gpio_pin].alternate;
+//     if (LL_GPIO_Init(gpio_desc_lut[gpio_pin].port, &gpio_init_struct) == ERROR) {
+//         return false;
+//     }
+//     return true;
+// }
+
+// bool GPIO_Driver_TogglePin (eGpioPin_t gpio_pin) {
+//     if (gpio_pin >= eGpioDriverPinLast) {
+//         return false;
+//     }
+//     LL_GPIO_TogglePin(gpio_desc_lut[gpio_pin].port, gpio_desc_lut[gpio_pin].pin);
+//     return true;
+// }
+
+// bool GPIO_Driver_WritePin (eGpioPin_t gpio_pin, eGpioPinState_t pin_state) {
+//     if (gpio_pin >= eGpioDriverPinLast) {
+//         return false;
+//     }
+//     switch (pin_state) {
+//         case ePinOn:
+//             LL_GPIO_SetOutputPin(gpio_desc_lut[gpio_pin].port, gpio_desc_lut[gpio_pin].pin);
+//             break;
+//         case ePinOff:
+//             LL_GPIO_ResetOutputPin(gpio_desc_lut[gpio_pin].port, gpio_desc_lut[gpio_pin].pin);
+//             break;
+//         default:
+//             return false;
+//     }
+//     return true;
+// }
+
+// bool GPIO_Driver_ReadPin (eGpioPin_t gpio_pin, eGpioPinStatus_t *pin_status) {
+//     if (pin_status == NULL) {
+//         return false;
+//     }
+//     if (gpio_pin >= eGpioDriverPinLast) {
+//         *pin_status = ePinNaN;
+//         return false;
+//     }
+//     switch (gpio_desc_lut[gpio_pin].mode) {
+//         case LL_GPIO_MODE_INPUT:
+//             if (LL_GPIO_IsInputPinSet(gpio_desc_lut[gpio_pin].port, gpio_desc_lut[gpio_pin].pin) == 1) {
+//                 *pin_status = ePinHigh;
+//             }
+//             else {
+//                 *pin_status = ePinLow;
+//             }
+//             break;
+//         case LL_GPIO_MODE_OUTPUT:
+//             if (LL_GPIO_IsInputPinSet(gpio_desc_lut[gpio_pin].port, gpio_desc_lut[gpio_pin].pin) == 1) {
+//                 *pin_status = ePinHigh;
+//             }
+//             else {
+//                 *pin_status = ePinLow;
+//             }
+//             break;
+//         default:
+//             *pin_status = ePinNaN;
+//             return false;
+//             break;
+//     }
+//     return true;
+// }
+
+// bool GPIO_Driver_InitAll (void) {
+//     eGpioAllPin_t all_good = eGpioAllPinsOK;
+//     for (eGpioPin_t pin = eGpioDriverPinFirst; pin < eGpioDriverPinLast; pin++) {
+//         if (GPIO_Driver_Init(pin) == false) {
+//             all_good = eGpioAllPinsNotOk;
+//         }
+//     }
+//     if (all_good == eGpioAllPinsNotOk) {
+//         return false;
+//     }
+//     return true;
+// }
+
+// bool GPIO_Driver_ExternalInterupt(eGpioInterupt_t gpio_interupt, eGpioPin_t gpio_pin, bool(*function)(void)) {
+
+//     external_desc_lut[gpio_interupt].function_pointer = function;
+//     LL_GPIO_SetPinMode(gpio_desc_lut[gpio_pin].port, gpio_desc_lut[gpio_pin].pin, gpio_desc_lut[gpio_pin].mode);
+//     LL_GPIO_SetPinPull(gpio_desc_lut[gpio_pin].port, gpio_desc_lut[gpio_pin].pin, gpio_desc_lut[gpio_pin].pull);
+
+//     LL_SYSCFG_SetEXTISource(external_desc_lut[gpio_interupt].interupt_port, external_desc_lut[gpio_interupt].interupt_pin);
+
+
+//     LL_EXTI_InitTypeDef EXTI_InitStruct = {0};
+//     EXTI_InitStruct.Line_0_31 = external_desc_lut[gpio_interupt].line031;
+//     EXTI_InitStruct.Line_32_63 = external_desc_lut[gpio_interupt].line3263;
+//     EXTI_InitStruct.LineCommand = external_desc_lut[gpio_interupt].command;
+//     EXTI_InitStruct.Mode = external_desc_lut[gpio_interupt].mode;
+//     EXTI_InitStruct.Trigger = external_desc_lut[gpio_interupt].trigger;
+//     LL_EXTI_Init(&EXTI_InitStruct);
+
+//     __NVIC_EnableIRQ(external_desc_lut[gpio_interupt].interupt_type);
+//     __NVIC_SetPriorityGrouping(0);
+//     __NVIC_SetPriority(external_desc_lut[gpio_interupt].interupt_type, 30);
+//     LL_EXTI_EnableIT_0_31(external_desc_lut[gpio_interupt].line031);
+
+//     return true;
+// }
+
+
+// uint16_t counter_acce=0;
+
+// void EXTI9_5_IRQHandler(void) {
+//   /* USER CODE BEGIN EXTI9_5_IRQn 0 */
+
+//   /* USER CODE END EXTI9_5_IRQn 0 */
+//   if (LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_9) != RESET)  {
+//       LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_9);
+//     /* USER CODE BEGIN LL_EXTI_LINE_9 */
+
+//       counter_acce++;
+//       external_desc_lut[eGpioInteruptAccelerometer].function_pointer();
+
+
+//     /* USER CODE END LL_EXTI_LINE_9 */
+//   }
+//   /* USER CODE BEGIN EXTI9_5_IRQn 1 */
+
+//   /* USER CODE END EXTI9_5_IRQn 1 */
+// }
+
+
+// /**********************************************************************************************************************
+//  * Definitions of exported functions
+//  *********************************************************************************************************************/
