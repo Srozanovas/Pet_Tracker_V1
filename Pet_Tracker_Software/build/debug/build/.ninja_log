@@ -12,8 +12,8 @@
 16	840	7231807057728876	CMakeFiles/Pet_Tracker.dir/Core/Src/stm32l4xx_hal_timebase_tim.c.obj	e3e7387cb0c001e1
 13	901	7231807058880915	CMakeFiles/Pet_Tracker.dir/Core/Src/stm32l4xx_it.c.obj	95d692c25507d3d9
 2	945	7231807059339686	CMakeFiles/Pet_Tracker.dir/Core/Src/freertos.c.obj	9095ffa7e4a9414f
-57	456	7231809151666352	Pet_Tracker.elf	56b9f2c16f83d3ef
-7	997	7231807059848330	CMakeFiles/Pet_Tracker.dir/Core/Src/main.c.obj	1f0a2a75590d06f6
+329	761	7232338619618336	Pet_Tracker.elf	56b9f2c16f83d3ef
+7	349	7232337522157721	CMakeFiles/Pet_Tracker.dir/Core/Src/main.c.obj	1f0a2a75590d06f6
 568	1102	7231807060860717	CMakeFiles/Pet_Tracker.dir/Middlewares/Third_Party/FreeRTOS/Source/portable/MemMang/heap_4.c.obj	15409879fc8e08a
 490	1208	7231807061783612	CMakeFiles/Pet_Tracker.dir/Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/port.c.obj	d899094757ebffbc
 542	1236	7231807061873371	CMakeFiles/Pet_Tracker.dir/Middlewares/Third_Party/FreeRTOS/Source/stream_buffer.c.obj	a0d60122d0b215a9
@@ -30,7 +30,7 @@
 841	1943	7231807069762656	CMakeFiles/Pet_Tracker.dir/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_dma.c.obj	4192550dc8ff707a
 1209	2206	7231807071597752	CMakeFiles/Pet_Tracker.dir/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_gpio.c.obj	334ab640fe594d3
 1356	2937	7231807079606727	CMakeFiles/Pet_Tracker.dir/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_i2c.c.obj	74326b1cfb90914e
-3	57	7231809148521376	CMakeFiles/Pet_Tracker.dir/Core/Src/gpio_driver.c.obj	5a3bed996e42ec99
+3	328	7232338616207644	CMakeFiles/Pet_Tracker.dir/Core/Src/gpio_driver.c.obj	5a3bed996e42ec99
 1103	2280	7231807072310962	CMakeFiles/Pet_Tracker.dir/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_exti.c.obj	9fc418cef1265ba4
 1328	2452	7231807074310712	CMakeFiles/Pet_Tracker.dir/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_i2c_ex.c.obj	e0097569075daf2e
 1237	2455	7231807074629846	CMakeFiles/Pet_Tracker.dir/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_pwr_ex.c.obj	7b0339497f62117f
@@ -39,3 +39,10 @@
 1575	2927	7231807079048219	CMakeFiles/Pet_Tracker.dir/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_rcc_ex.c.obj	8bf8a66cf34fe909
 1921	2931	7231807079118036	CMakeFiles/Pet_Tracker.dir/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_uart_ex.c.obj	627e5aa1a0e5c055
 1764	3357	7231807083978076	CMakeFiles/Pet_Tracker.dir/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_tim.c.obj	311c3051c474f6d8
+9	423	7233172100992662	CMakeFiles/Pet_Tracker.dir/Core/Src/main.c.obj	1f0a2a75590d06f6
+4	476	7233172455523472	CMakeFiles/Pet_Tracker.dir/Core/Src/main.c.obj	1f0a2a75590d06f6
+7	345	7233176652178711	CMakeFiles/Pet_Tracker.dir/Core/Src/gpio_driver.c.obj	5a3bed996e42ec99
+4	330	7233176830951965	CMakeFiles/Pet_Tracker.dir/Core/Src/main.c.obj	1f0a2a75590d06f6
+330	822	7233176834964603	Pet_Tracker.elf	56b9f2c16f83d3ef
+3	393	7233181356856912	CMakeFiles/Pet_Tracker.dir/Core/Src/main.c.obj	1f0a2a75590d06f6
+393	785	7233181360016432	Pet_Tracker.elf	56b9f2c16f83d3ef

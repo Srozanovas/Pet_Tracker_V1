@@ -6,5 +6,8 @@
     "DEBUG",
     "USE_HAL_DRIVER",
     "STM32L433"
-  ]
+  ],
+  "files.associations": {
+    "gpio_driver.h": "c"
+  }
 }
