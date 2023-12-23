@@ -107,7 +107,7 @@ int main(void)
   GPIO_Driver_Init(eGpioPinB0);
   GPIO_Driver_Init(eGpioPinB1);
   GPIO_Driver_Init(eGpioPinB2);
-
+  GPIO_Driver_WritePin(eGpioPinB2, ePinHigh);
   MX_USART1_UART_Init();
   MX_I2C1_Init();
   MX_I2C2_Init();

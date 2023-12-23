@@ -1,0 +1,4 @@
+Change Component Comment : Designator=C3 Old Comment=SMT_CAP New Comment=10uF
+Added Pin To Net: NetName=NetD5_1 Pin=R1-1
+Added Room: Name=Power_Schematic
+Added Room: Name=STM

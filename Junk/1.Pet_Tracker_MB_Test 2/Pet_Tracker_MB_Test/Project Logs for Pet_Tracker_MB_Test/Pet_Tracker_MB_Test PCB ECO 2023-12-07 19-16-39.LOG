@@ -1,0 +1,80 @@
+Removed Pin From Net: NetName=I2C1SDA Pin=B3-29
+Removed Pin From Net: NetName=I2C2SDA Pin=B3-43
+Removed Pin From Net: NetName=3V3 Pin=Boot +-1
+Removed Pin From Net: NetName=GND Pin=Boot +-3
+Removed Pin From Net: NetName=5V_UNREGULATED Pin=D1-C
+Removed Pin From Net: NetName=5V_UNREGULATED Pin=Mano_test-2
+Removed Pin From Net: NetName=V_Bat Pin=Originalus-2
+Removed Pin From Net: NetName=5V_UNREGULATED Pin=Originalus-3
+Removed Pin From Net: NetName=GND Pin=P4-1
+Removed Pin From Net: NetName=5V Pin=P4-2
+Removed Pin From Net: NetName=5V_USB_CHRG Pin=R1-2
+Removed Pin From Net: NetName=5V_USB_CHRG Pin=R3-2
+Removed Pin From Net: NetName=GND Pin=R5-1
+Removed Member From Class: ClassName=STM Member=Boot +
+Removed Member From Class: ClassName=Power_Schematic Member=Originalus
+Removed Member From Class: ClassName=Power_Schematic Member=R3
+Removed Member From Class: ClassName=Power_Schematic Member=R5
+Change component parameters: Designator = "J1" ("J1"); Footprint = "POWER_USB_C"; UniqueID = "\KDXEMWTK" ("\KDXEMWTK")
+Change component parameters (AddParameter): Name = "Availability"; Value = "Unavailable"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "MF"; Value = ""; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "MP"; Value = "USB4125-GF-A_REVA2"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Package"; Value = "None"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Price"; Value = "None"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Value"; Value = ""; VariantName = "[No Variations]"
+Added Component: Designator=D5(LED_0805)
+Add component (AddParameter): Name = "Arrow Part Number"; Value = ""; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Arrow Price/Stock"; Value = ""; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Datasheet Link"; Value = "https://docs.broadcom.com/docs/AV02-0551EN"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Geometry.Height"; Value = "0.9mm"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Manufacturer_Name"; Value = "Avago Technologies"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Manufacturer_Part_Number"; Value = "HSMH-C170"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Mouser Part Number"; Value = "630-HSMH-C170"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Mouser Price/Stock"; Value = "https://www.mouser.co.uk/ProductDetail/Broadcom-Avago/HSMH-C170?qs=YDL0qNrpDT6b21G9HrN9ig%3D%3D"; VariantName = "[No Variations]"
+Added Component: Designator=P2(HDR1X5H)
+Add component (AddParameter): Name = "LatestRevisionDate"; Value = "17-Jul-2002"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "LatestRevisionNote"; Value = "Re-released for DXP Platform."; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Publisher"; Value = "Altium Limited"; VariantName = "[No Variations]"
+Added Component: Designator=S1(HDR1X3)
+Add component (AddParameter): Name = "ComponentLink1Description"; Value = "Manufacturer Link"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "ComponentLink1URL"; Value = "http://www.apem.com"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "DatasheetVersion"; Value = "05-Dec-2000"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "LatestRevisionDate"; Value = "17-Dec-2003"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "LatestRevisionNote"; Value = "Schematic revised, PCB Footprint replaced."; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "PackageDescription"; Value = "Switch; 4 Leads"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "PackageReference"; Value = "TL36WW15050"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Published"; Value = "24-Mar-1999"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Publisher"; Value = "Altium Limited"; VariantName = "[No Variations]"
+Added Pin To Net: NetName=I2C1SDA Pin=B3-43
+Added Pin To Net: NetName=GND Pin=B3-59
+Added Pin To Net: NetName=5V_UNREGULATED Pin=D5-2
+Added Pin To Net: NetName=5V_USB_CHRG Pin=Mano_test-1
+Added Pin To Net: NetName=5V Pin=P2-2
+Added Pin To Net: NetName=4V Pin=P2-3
+Added Pin To Net: NetName=3V3 Pin=P2-4
+Added Pin To Net: NetName=GND Pin=P2-5
+Added Pin To Net: NetName=GND Pin=R1-1
+Added Pin To Net: NetName=5V_USB_CHRG Pin=R2-2
+Added Pin To Net: NetName=GND Pin=S1-1
+Added Pin To Net: NetName=5V_UNREGULATED Pin=S1-2
+Change Net Name : Old Net Name=5V_UNREGULATED New Net Name=NetC7_2
+Change Net Name : Old Net Name=PA3 New Net Name=PA1
+Added Pin To Net: NetName=5V_UNREGULATED Pin=D1-C
+Added Pin To Net: NetName=5V_UNREGULATED Pin=Mano_test-2
+Added Pin To Net: NetName=5V_UNREGULATED Pin=S1-3
+Added Net: Name=5V_UNREGULATED
+Added Pin To Net: NetName=NetD5_1 Pin=D5-1
+Added Pin To Net: NetName=NetD5_1 Pin=R1-1
+Added Net: Name=NetD5_1
+Added Pin To Net: NetName=PC10 Pin=B3-51
+Added Pin To Net: NetName=PC10 Pin=P4-2
+Added Net: Name=PC10
+Added Pin To Net: NetName=PC11 Pin=B3-52
+Added Pin To Net: NetName=PC11 Pin=P4-1
+Added Net: Name=PC11
+Added Member To Class: ClassName=Power_Schematic Member=Component D5 Charge_LED
+Added Member To Class: ClassName=Power_Schematic Member=Component J1 POWER_USB_C
+Added Member To Class: ClassName=Power_Schematic Member=Component P2 Header 5H
+Added Member To Class: ClassName=Power_Schematic Member=Component S1 SW-SPDT
+Added Room: Name=Power_Schematic
+Added Room: Name=STM

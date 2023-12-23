@@ -1,0 +1,17 @@
+Removed Pin From Net: NetName=5V_UNREGULATED Pin=P3-1
+Removed Pin From Net: NetName=POWER_ON Pin=P3-2
+Removed Pin From Net: NetName=GND Pin=P3-3
+Removed Member From Class: ClassName=Schematic Member=P3
+Added Component: Designator=S1(SLIDE_SWITCH_BIG)
+Add component (AddParameter): Name = "Availability"; Value = "Unavailable"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "MF"; Value = ""; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "MP"; Value = "500SSP1S2M2QEA"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Package"; Value = "None"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Price"; Value = "None"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Value"; Value = ""; VariantName = "[No Variations]"
+Added Pin To Net: NetName=5V_UNREGULATED Pin=S1-1
+Added Pin To Net: NetName=POWER_ON Pin=S1-2
+Added Pin To Net: NetName=GND Pin=S1-3
+Added Member To Class: ClassName=Schematic Member=Component S1 SLIDE_SWITCH_BIG
+Added Room: Name=Modem
+Added Room: Name=Schematic

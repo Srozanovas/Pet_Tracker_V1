@@ -37,7 +37,8 @@ typedef struct sGpioDesc_t {
     uint32_t speed;
     uint32_t pull;
     uint32_t alternate; 
-    eGpioInterupt_t interupt;
+    bool interupt_enable; 
+    IRQn_Type interupt;
 } sGpioDesc_t;
 
 // typedef struct sGPioExternalDesc_t {
@@ -55,36 +56,36 @@ typedef struct sGpioDesc_t {
 
 const static sGpioDesc_t gpio_desc_lut[] = {
     //GPIOA
-    [eGpioPinA1]            = {.port = GPIOA, .pin = GPIO_PIN_1,    .mode = GPIO_MODE_OUTPUT_PP,    .speed = GPIO_SPEED_FREQ_LOW,       .pull = GPIO_NOPULL, .alternate = 0                 },
-    [eGpioPinA2UART2TX]     = {.port = GPIOA, .pin = GPIO_PIN_2,    .mode = GPIO_MODE_AF_PP,        .speed = GPIO_SPEED_FREQ_VERY_HIGH, .pull = GPIO_NOPULL, .alternate = GPIO_AF3_USART2   },
-    [eGpioPinA3UART2RX]     = {.port = GPIOA, .pin = GPIO_PIN_3,    .mode = GPIO_MODE_AF_PP,        .speed = GPIO_SPEED_FREQ_VERY_HIGH, .pull = GPIO_NOPULL, .alternate = GPIO_AF3_USART2   },
-    [eGpioPinA4AcceInt]     = {.port = GPIOA, .pin = GPIO_PIN_4,    .mode = GPIO_MODE_OUTPUT_PP,    .speed = GPIO_SPEED_FREQ_LOW,       .pull = GPIO_NOPULL, .alternate = 0                 },
-    [eGpioPinA5GSMEnable]   = {.port = GPIOA, .pin = GPIO_PIN_5,    .mode = GPIO_MODE_EVT_RISING,   .speed = GPIO_SPEED_FREQ_LOW,       .pull = GPIO_NOPULL, .alternate = 0                 },
-    [eGpioPinA6]            = {.port = GPIOA, .pin = GPIO_PIN_6,    .mode = GPIO_MODE_OUTPUT_PP,    .speed = GPIO_SPEED_FREQ_LOW,       .pull = GPIO_NOPULL, .alternate = 0                 },
-    [eGpioPinA7]            = {.port = GPIOA, .pin = GPIO_PIN_7,    .mode = GPIO_MODE_OUTPUT_PP,    .speed = GPIO_SPEED_FREQ_LOW,       .pull = GPIO_NOPULL, .alternate = 0                 },
-    [eGpioPinA9I2C1SCL]     = {.port = GPIOA, .pin = GPIO_PIN_9,    .mode = GPIO_MODE_AF_OD,        .speed = GPIO_SPEED_FREQ_VERY_HIGH, .pull = GPIO_NOPULL, .alternate = GPIO_AF4_I2C1     },
-    [eGpioPinA10I2C1SDA]    = {.port = GPIOA, .pin = GPIO_PIN_10,   .mode = GPIO_MODE_AF_OD,        .speed = GPIO_SPEED_FREQ_VERY_HIGH, .pull = GPIO_NOPULL, .alternate = GPIO_AF4_I2C1     },
-    [eGpioPinA11]           = {.port = GPIOA, .pin = GPIO_PIN_11,   .mode = GPIO_MODE_OUTPUT_PP,    .speed = GPIO_SPEED_FREQ_LOW,       .pull = GPIO_NOPULL, .alternate = 0                 },
-    [eGpioPinA12]           = {.port = GPIOA, .pin = GPIO_PIN_12,   .mode = GPIO_MODE_OUTPUT_PP,    .speed = GPIO_SPEED_FREQ_LOW,       .pull = GPIO_NOPULL, .alternate = 0                 },
-    [eGpioPinA15]           = {.port = GPIOA, .pin = GPIO_PIN_15,   .mode = GPIO_MODE_OUTPUT_PP,    .speed = GPIO_SPEED_FREQ_LOW,       .pull = GPIO_NOPULL, .alternate = 0                 },
+    [eGpioPinA1]            = {.port = GPIOA, .pin = GPIO_PIN_1,    .mode = GPIO_MODE_OUTPUT_PP,    .speed = GPIO_SPEED_FREQ_LOW,       .pull = GPIO_NOPULL, .alternate = 0,                .interupt_enable = false, .interupt=0xFF        },
+    [eGpioPinA2UART2TX]     = {.port = GPIOA, .pin = GPIO_PIN_2,    .mode = GPIO_MODE_AF_PP,        .speed = GPIO_SPEED_FREQ_VERY_HIGH, .pull = GPIO_NOPULL, .alternate = GPIO_AF3_USART2,  .interupt_enable = false, .interupt=0xFF        },
+    [eGpioPinA3UART2RX]     = {.port = GPIOA, .pin = GPIO_PIN_3,    .mode = GPIO_MODE_AF_PP,        .speed = GPIO_SPEED_FREQ_VERY_HIGH, .pull = GPIO_NOPULL, .alternate = GPIO_AF3_USART2,  .interupt_enable = false, .interupt=0xFF        },
+    [eGpioPinA4AcceInt]     = {.port = GPIOA, .pin = GPIO_PIN_4,    .mode = GPIO_MODE_OUTPUT_PP,    .speed = GPIO_SPEED_FREQ_LOW,       .pull = GPIO_NOPULL, .alternate = 0,                .interupt_enable = false, .interupt=0xFF        },
+    [eGpioPinA5GSMEnable]   = {.port = GPIOA, .pin = GPIO_PIN_5,    .mode = GPIO_MODE_EVT_RISING,   .speed = GPIO_SPEED_FREQ_LOW,       .pull = GPIO_NOPULL, .alternate = 0,                .interupt_enable = false, .interupt=0xFF        },
+    [eGpioPinA6]            = {.port = GPIOA, .pin = GPIO_PIN_6,    .mode = GPIO_MODE_OUTPUT_PP,    .speed = GPIO_SPEED_FREQ_LOW,       .pull = GPIO_NOPULL, .alternate = 0,                .interupt_enable = false, .interupt=0xFF        },
+    [eGpioPinA7]            = {.port = GPIOA, .pin = GPIO_PIN_7,    .mode = GPIO_MODE_OUTPUT_PP,    .speed = GPIO_SPEED_FREQ_LOW,       .pull = GPIO_NOPULL, .alternate = 0,                .interupt_enable = false, .interupt=0xFF        },
+    [eGpioPinA9I2C1SCL]     = {.port = GPIOA, .pin = GPIO_PIN_9,    .mode = GPIO_MODE_AF_OD,        .speed = GPIO_SPEED_FREQ_VERY_HIGH, .pull = GPIO_NOPULL, .alternate = GPIO_AF4_I2C1,    .interupt_enable = false, .interupt=0xFF        },
+    [eGpioPinA10I2C1SDA]    = {.port = GPIOA, .pin = GPIO_PIN_10,   .mode = GPIO_MODE_AF_OD,        .speed = GPIO_SPEED_FREQ_VERY_HIGH, .pull = GPIO_NOPULL, .alternate = GPIO_AF4_I2C1,    .interupt_enable = false, .interupt=0xFF        },
+    [eGpioPinA11]           = {.port = GPIOA, .pin = GPIO_PIN_11,   .mode = GPIO_MODE_OUTPUT_PP,    .speed = GPIO_SPEED_FREQ_LOW,       .pull = GPIO_NOPULL, .alternate = 0,                .interupt_enable = false, .interupt=0xFF        },
+    [eGpioPinA12]           = {.port = GPIOA, .pin = GPIO_PIN_12,   .mode = GPIO_MODE_OUTPUT_PP,    .speed = GPIO_SPEED_FREQ_LOW,       .pull = GPIO_NOPULL, .alternate = 0,                .interupt_enable = false, .interupt=0xFF        },
+    [eGpioPinA15]           = {.port = GPIOA, .pin = GPIO_PIN_15,   .mode = GPIO_MODE_OUTPUT_PP,    .speed = GPIO_SPEED_FREQ_LOW,       .pull = GPIO_NOPULL, .alternate = 0,                .interupt_enable = false, .interupt=0xFF        },
     //GPIOB
-    [eGpioPinB0]            = {.port = GPIOB, .pin = GPIO_PIN_0,    .mode = GPIO_MODE_OUTPUT_PP,    .speed = GPIO_SPEED_FREQ_LOW,       .pull = GPIO_NOPULL, .alternate = 0                 },
-    [eGpioPinB1]            = {.port = GPIOB, .pin = GPIO_PIN_1,    .mode = GPIO_MODE_OUTPUT_PP,    .speed = GPIO_SPEED_FREQ_LOW,       .pull = GPIO_NOPULL, .alternate = 0                 },
-    [eGpioPinB2]            = {.port = GPIOB, .pin = GPIO_PIN_2,    .mode = GPIO_MODE_OUTPUT_PP,    .speed = GPIO_SPEED_FREQ_LOW,       .pull = GPIO_NOPULL, .alternate = 0                 },
-    [eGpioPinB6UART1TX]     = {.port = GPIOB, .pin = GPIO_PIN_6,    .mode = GPIO_MODE_AF_PP,        .speed = GPIO_SPEED_FREQ_LOW,       .pull = GPIO_NOPULL, .alternate = GPIO_AF7_USART1   },
-    [eGpioPinB7UART1RX]     = {.port = GPIOB, .pin = GPIO_PIN_7,    .mode = GPIO_MODE_AF_PP,        .speed = GPIO_SPEED_FREQ_LOW,       .pull = GPIO_NOPULL, .alternate = GPIO_AF7_USART1   },
-    [eGpioPinB10I2C2SCL]    = {.port = GPIOB, .pin = GPIO_PIN_10,   .mode = GPIO_MODE_AF_OD,        .speed = GPIO_SPEED_FREQ_VERY_HIGH, .pull = GPIO_NOPULL, .alternate = GPIO_AF4_I2C2     },
-    [eGpioPinB11I2C2SDA]    = {.port = GPIOB, .pin = GPIO_PIN_11,   .mode = GPIO_MODE_AF_OD,        .speed = GPIO_SPEED_FREQ_VERY_HIGH, .pull = GPIO_NOPULL, .alternate = GPIO_AF4_I2C2     },
-    [eGpioPinB12]           = {.port = GPIOB, .pin = GPIO_PIN_12,   .mode = GPIO_MODE_OUTPUT_PP,    .speed = GPIO_SPEED_FREQ_LOW,       .pull = GPIO_NOPULL, .alternate = 0                 },
-    [eGpioPinB13]           = {.port = GPIOB, .pin = GPIO_PIN_13,   .mode = GPIO_MODE_OUTPUT_PP,    .speed = GPIO_SPEED_FREQ_LOW,       .pull = GPIO_NOPULL, .alternate = 0                 },
-    [eGpioPinB14]           = {.port = GPIOB, .pin = GPIO_PIN_14,   .mode = GPIO_MODE_OUTPUT_PP,    .speed = GPIO_SPEED_FREQ_LOW,       .pull = GPIO_NOPULL, .alternate = 0                 },
-    [eGpioPinB15]           = {.port = GPIOB, .pin = GPIO_PIN_15,   .mode = GPIO_MODE_OUTPUT_PP,    .speed = GPIO_SPEED_FREQ_LOW,       .pull = GPIO_NOPULL, .alternate = 0                 },
+    [eGpioPinB0]            = {.port = GPIOB, .pin = GPIO_PIN_0,    .mode = GPIO_MODE_EVT_RISING,   .speed = GPIO_SPEED_FREQ_LOW,       .pull = GPIO_NOPULL, .alternate = 0,                .interupt_enable = true,  .interupt=EXTI0_IRQn  },
+    [eGpioPinB1]            = {.port = GPIOB, .pin = GPIO_PIN_1,    .mode = GPIO_MODE_OUTPUT_PP,    .speed = GPIO_SPEED_FREQ_LOW,       .pull = GPIO_NOPULL, .alternate = 0,                .interupt_enable = false, .interupt=0xFF        },
+    [eGpioPinB2]            = {.port = GPIOB, .pin = GPIO_PIN_2,    .mode = GPIO_MODE_OUTPUT_PP,    .speed = GPIO_SPEED_FREQ_LOW,       .pull = GPIO_NOPULL, .alternate = 0,                .interupt_enable = false, .interupt=0xFF        },
+    [eGpioPinB6UART1TX]     = {.port = GPIOB, .pin = GPIO_PIN_6,    .mode = GPIO_MODE_AF_PP,        .speed = GPIO_SPEED_FREQ_LOW,       .pull = GPIO_NOPULL, .alternate = GPIO_AF7_USART1,  .interupt_enable = false, .interupt=0xFF        },
+    [eGpioPinB7UART1RX]     = {.port = GPIOB, .pin = GPIO_PIN_7,    .mode = GPIO_MODE_AF_PP,        .speed = GPIO_SPEED_FREQ_LOW,       .pull = GPIO_NOPULL, .alternate = GPIO_AF7_USART1,  .interupt_enable = false, .interupt=0xFF        },
+    [eGpioPinB10I2C2SCL]    = {.port = GPIOB, .pin = GPIO_PIN_10,   .mode = GPIO_MODE_AF_OD,        .speed = GPIO_SPEED_FREQ_VERY_HIGH, .pull = GPIO_NOPULL, .alternate = GPIO_AF4_I2C2,    .interupt_enable = false, .interupt=0xFF        },
+    [eGpioPinB11I2C2SDA]    = {.port = GPIOB, .pin = GPIO_PIN_11,   .mode = GPIO_MODE_AF_OD,        .speed = GPIO_SPEED_FREQ_VERY_HIGH, .pull = GPIO_NOPULL, .alternate = GPIO_AF4_I2C2,    .interupt_enable = false, .interupt=0xFF        },
+    [eGpioPinB12]           = {.port = GPIOB, .pin = GPIO_PIN_12,   .mode = GPIO_MODE_OUTPUT_PP,    .speed = GPIO_SPEED_FREQ_LOW,       .pull = GPIO_NOPULL, .alternate = 0,                .interupt_enable = false, .interupt=0xFF        },
+    [eGpioPinB13]           = {.port = GPIOB, .pin = GPIO_PIN_13,   .mode = GPIO_MODE_OUTPUT_PP,    .speed = GPIO_SPEED_FREQ_LOW,       .pull = GPIO_NOPULL, .alternate = 0,                .interupt_enable = false, .interupt=0xFF        },
+    [eGpioPinB14]           = {.port = GPIOB, .pin = GPIO_PIN_14,   .mode = GPIO_MODE_OUTPUT_PP,    .speed = GPIO_SPEED_FREQ_LOW,       .pull = GPIO_NOPULL, .alternate = 0,                .interupt_enable = false, .interupt=0xFF        },
+    [eGpioPinB15]           = {.port = GPIOB, .pin = GPIO_PIN_15,   .mode = GPIO_MODE_OUTPUT_PP,    .speed = GPIO_SPEED_FREQ_LOW,       .pull = GPIO_NOPULL, .alternate = 0,                .interupt_enable = false, .interupt=0xFF        },
     //GPIOC
-    [eGpioPinC4]            = {.port = GPIOC, .pin = GPIO_PIN_4,    .mode = GPIO_MODE_OUTPUT_PP,    .speed = GPIO_SPEED_FREQ_LOW,       .pull = GPIO_NOPULL, .alternate = 0                 },
-    [eGpioPinC6]            = {.port = GPIOC, .pin = GPIO_PIN_6,    .mode = GPIO_MODE_OUTPUT_PP,    .speed = GPIO_SPEED_FREQ_LOW,       .pull = GPIO_NOPULL, .alternate = 0                 },
-    [eGpioPinC7]            = {.port = GPIOC, .pin = GPIO_PIN_7,    .mode = GPIO_MODE_OUTPUT_PP,    .speed = GPIO_SPEED_FREQ_LOW,       .pull = GPIO_NOPULL, .alternate = 0                 },
-    [eGpioPinC8]            = {.port = GPIOC, .pin = GPIO_PIN_8,    .mode = GPIO_MODE_OUTPUT_PP,    .speed = GPIO_SPEED_FREQ_LOW,       .pull = GPIO_NOPULL, .alternate = 0                 },
-    [eGpioPinC9]            = {.port = GPIOC, .pin = GPIO_PIN_9,    .mode = GPIO_MODE_OUTPUT_PP,    .speed = GPIO_SPEED_FREQ_LOW,       .pull = GPIO_NOPULL, .alternate = 0                 },
+    [eGpioPinC4]            = {.port = GPIOC, .pin = GPIO_PIN_4,    .mode = GPIO_MODE_OUTPUT_PP,    .speed = GPIO_SPEED_FREQ_LOW,       .pull = GPIO_NOPULL, .alternate = 0,                .interupt_enable = false, .interupt=0xFF        },
+    [eGpioPinC6]            = {.port = GPIOC, .pin = GPIO_PIN_6,    .mode = GPIO_MODE_OUTPUT_PP,    .speed = GPIO_SPEED_FREQ_LOW,       .pull = GPIO_NOPULL, .alternate = 0,                .interupt_enable = false, .interupt=0xFF        },
+    [eGpioPinC7]            = {.port = GPIOC, .pin = GPIO_PIN_7,    .mode = GPIO_MODE_OUTPUT_PP,    .speed = GPIO_SPEED_FREQ_LOW,       .pull = GPIO_NOPULL, .alternate = 0,                .interupt_enable = false, .interupt=0xFF        },
+    [eGpioPinC8]            = {.port = GPIOC, .pin = GPIO_PIN_8,    .mode = GPIO_MODE_OUTPUT_PP,    .speed = GPIO_SPEED_FREQ_LOW,       .pull = GPIO_NOPULL, .alternate = 0,                .interupt_enable = false, .interupt=0xFF        },
+    [eGpioPinC9]            = {.port = GPIOC, .pin = GPIO_PIN_9,    .mode = GPIO_MODE_OUTPUT_PP,    .speed = GPIO_SPEED_FREQ_LOW,       .pull = GPIO_NOPULL, .alternate = 0,                .interupt_enable = false, .interupt=0xFF        },
     };
 
 
@@ -94,12 +95,9 @@ const static sGpioDesc_t gpio_desc_lut[] = {
 
 
 
-
-
-
 bool GPIO_Driver_Init (eGpioPin_t gpio_pin, ...) {
-    va_list args;
-    va_start(args, gpio_pin);
+
+    //UNDEFINED PIN 
 
     if (gpio_pin >= eGpioPinLast) {
         return false;
@@ -108,6 +106,7 @@ bool GPIO_Driver_Init (eGpioPin_t gpio_pin, ...) {
     GPIO_InitTypeDef gpio_init_struct = {0};
 
     //CLOCKS ENABLE 
+
     if (rtc_clock_enabled&RTC_H_CLOCK_ENABLED==0){
         __HAL_RCC_GPIOH_CLK_ENABLE();
         rtc_clock_enabled&=RTC_H_CLOCK_ENABLED;      
@@ -137,23 +136,26 @@ bool GPIO_Driver_Init (eGpioPin_t gpio_pin, ...) {
         default: return false;                 
     }
 
-    HAL_GPIO_WritePin(gpio_desc_lut[gpio_pin].port, gpio_desc_lut[gpio_pin].pin, GPIO_PIN_RESET);
-//     if (gpio_desc_lut[gpio_pin].interupt_enable == eGpioExternal) {
-//         if (GPIO_Driver_ExternalInterupt(gpio_desc_lut[gpio_pin].interupt, gpio_pin,(bool(*)(void)) va_arg(args, bool*)) != true){
-//             va_end(args);
-//             return false;
+    //GPIO STRUCT FORMATION
 
-//         }
-//         va_end(args);
-//         return true;
-//     }
-//     va_end(args);
+    HAL_GPIO_WritePin(gpio_desc_lut[gpio_pin].port, gpio_desc_lut[gpio_pin].pin, GPIO_PIN_RESET);
     gpio_init_struct.Pin = gpio_desc_lut[gpio_pin].pin;
     gpio_init_struct.Mode = gpio_desc_lut[gpio_pin].mode;
     gpio_init_struct.Speed = gpio_desc_lut[gpio_pin].speed;
     gpio_init_struct.Pull = gpio_desc_lut[gpio_pin].pull;
     gpio_init_struct.Alternate = gpio_desc_lut[gpio_pin].alternate;
     HAL_GPIO_Init(gpio_desc_lut[gpio_pin].port, &gpio_init_struct);
+
+    //INTERUPT ENABLE 
+    if (gpio_desc_lut[gpio_pin].interupt_enable == true){ 
+        
+        __NVIC_SetPriorityGrouping(0);
+        __NVIC_SetPriority(EXTI0_IRQn, 30);
+        __NVIC_EnableIRQ(EXTI0_IRQn);
+       // HAL_NVIC_EnableIRQ(EXTI0_IRQn);
+       // HAL_NVIC_SetPriority(EXTI0_IRQn, 0, 0);
+    }
+
     return true;
 }
 
@@ -212,54 +214,17 @@ bool GPIO_Driver_InitAll (void) {
     return true;
 }
 
-// bool GPIO_Driver_ExternalInterupt(eGpioInterupt_t gpio_interupt, eGpioPin_t gpio_pin, bool(*function)(void)) {
-
-//     external_desc_lut[gpio_interupt].function_pointer = function;
-//     LL_GPIO_SetPinMode(gpio_desc_lut[gpio_pin].port, gpio_desc_lut[gpio_pin].pin, gpio_desc_lut[gpio_pin].mode);
-//     LL_GPIO_SetPinPull(gpio_desc_lut[gpio_pin].port, gpio_desc_lut[gpio_pin].pin, gpio_desc_lut[gpio_pin].pull);
-
-//     LL_SYSCFG_SetEXTISource(external_desc_lut[gpio_interupt].interupt_port, external_desc_lut[gpio_interupt].interupt_pin);
 
 
-//     LL_EXTI_InitTypeDef EXTI_InitStruct = {0};
-//     EXTI_InitStruct.Line_0_31 = external_desc_lut[gpio_interupt].line031;
-//     EXTI_InitStruct.Line_32_63 = external_desc_lut[gpio_interupt].line3263;
-//     EXTI_InitStruct.LineCommand = external_desc_lut[gpio_interupt].command;
-//     EXTI_InitStruct.Mode = external_desc_lut[gpio_interupt].mode;
-//     EXTI_InitStruct.Trigger = external_desc_lut[gpio_interupt].trigger;
-//     LL_EXTI_Init(&EXTI_InitStruct);
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+  /* Prevent unused argument(s) compilation warning */
+  UNUSED(GPIO_Pin);
 
-//     __NVIC_EnableIRQ(external_desc_lut[gpio_interupt].interupt_type);
-//     __NVIC_SetPriorityGrouping(0);
-//     __NVIC_SetPriority(external_desc_lut[gpio_interupt].interupt_type, 30);
-//     LL_EXTI_EnableIT_0_31(external_desc_lut[gpio_interupt].line031);
-
-//     return true;
-// }
-
-
-// uint16_t counter_acce=0;
-
-// void EXTI9_5_IRQHandler(void) {
-//   /* USER CODE BEGIN EXTI9_5_IRQn 0 */
-
-//   /* USER CODE END EXTI9_5_IRQn 0 */
-//   if (LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_9) != RESET)  {
-//       LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_9);
-//     /* USER CODE BEGIN LL_EXTI_LINE_9 */
-
-//       counter_acce++;
-//       external_desc_lut[eGpioInteruptAccelerometer].function_pointer();
-
-
-//     /* USER CODE END LL_EXTI_LINE_9 */
-//   }
-//   /* USER CODE BEGIN EXTI9_5_IRQn 1 */
-
-//   /* USER CODE END EXTI9_5_IRQn 1 */
-// }
-
-
+  /* NOTE: This function should not be modified, when the callback is needed,
+           the HAL_GPIO_EXTI_Callback could be implemented in the user file
+   */
+}
 // /**********************************************************************************************************************
 //  * Definitions of exported functions
 //  *********************************************************************************************************************/

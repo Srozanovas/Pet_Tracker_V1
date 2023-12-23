@@ -1,0 +1,9 @@
+Removed Pin From Net: NetName=UART2TX Pin=B3-15
+Removed Pin From Net: NetName=UART2RX Pin=B3-16
+Removed Pin From Net: NetName=PA1 Pin=B3-17
+Added Pin To Net: NetName=PA1 Pin=B3-15
+Added Pin To Net: NetName=UART2TX Pin=B3-16
+Added Pin To Net: NetName=UART2RX Pin=B3-17
+Added Pin To Net: NetName=GND Pin=R1-1
+Added Room: Name=Power_Schematic
+Added Room: Name=STM

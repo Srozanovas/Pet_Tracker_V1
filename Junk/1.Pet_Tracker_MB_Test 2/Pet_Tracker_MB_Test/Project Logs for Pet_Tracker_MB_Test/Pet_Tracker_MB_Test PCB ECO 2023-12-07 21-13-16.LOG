@@ -1,0 +1,17 @@
+Removed Pin From Net: NetName=GND Pin=Bat+-1
+Removed Pin From Net: NetName=V_Bat Pin=Bat+-2
+Removed Pin From Net: NetName=GND Pin=P1-16
+Removed Pin From Net: NetName=NetC7_2 Pin=P1-18
+Removed Pin From Net: NetName=CHARGE_LED_CATH Pin=P1-20
+Removed Pin From Net: NetName=3V3 Pin=P1-26
+Removed Pin From Net: NetName=5V Pin=P1-30
+Removed Pin From Net: NetName=GND Pin=P2-12
+Removed Pin From Net: NetName=V_Bat Pin=TP_Bat-1
+Removed Member From Class: ClassName=Power_Schematic Member=Bat+
+Removed Member From Class: ClassName=Power_Schematic Member=TP_Bat
+Added Pin To Net: NetName=NetC7_2 Pin=P1-16
+Added Pin To Net: NetName=CHARGE_LED_CATH Pin=P1-18
+Added Pin To Net: NetName=V_Bat Pin=P1-20
+Added Pin To Net: NetName=5V Pin=P1-26
+Added Pin To Net: NetName=3V3 Pin=P1-30
+Added Pin To Net: NetName=NetD5_1 Pin=R1-1

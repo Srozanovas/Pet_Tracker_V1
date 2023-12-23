@@ -1,0 +1,7 @@
+Removed Pin From Net: NetName=3V3 Pin=Debug-1
+Removed Member From Class: ClassName=STM Member=Debug
+Change Component Designator: OldDesignator=J? NewDesignator=J1
+Change Component Designator: OldDesignator=P? NewDesignator=P1
+Change Component Designator: OldDesignator=P? NewDesignator=P2
+Added Pin To Net: NetName=GND Pin=R1-1
+Added Member To Class: ClassName=STM Member=Component P2 Header 15X2

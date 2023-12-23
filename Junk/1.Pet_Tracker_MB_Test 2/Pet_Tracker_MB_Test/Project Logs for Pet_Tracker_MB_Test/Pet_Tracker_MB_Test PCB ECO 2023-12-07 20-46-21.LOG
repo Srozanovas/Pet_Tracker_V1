@@ -1,0 +1,23 @@
+Removed Pin From Net: NetName=GND Pin=P1-18
+Removed Pin From Net: NetName=GND Pin=P2-2
+Removed Pin From Net: NetName=GND Pin=P2-4
+Removed Pin From Net: NetName=GND Pin=P2-6
+Removed Pin From Net: NetName=GND Pin=P2-8
+Removed Pin From Net: NetName=GND Pin=P2-10
+Removed Pin From Net: NetName=GND Pin=P2-14
+Removed Pin From Net: NetName=GND Pin=P2-16
+Removed Pin From Net: NetName=GND Pin=P2-18
+Removed Pin From Net: NetName=GND Pin=P2-20
+Removed Pin From Net: NetName=GND Pin=P2-22
+Removed Pin From Net: NetName=GND Pin=P2-24
+Removed Pin From Net: NetName=GND Pin=P2-26
+Removed Pin From Net: NetName=GND Pin=P2-28
+Removed Pin From Net: NetName=GND Pin=P2-30
+Removed Pin From Net: NetName=GND Pin=S1-1
+Removed Pin From Net: NetName=NetC7_2 Pin=S1-2
+Removed Pin From Net: NetName=5V_UNREGULATED Pin=S1-3
+Removed Member From Class: ClassName=Power_Schematic Member=S1
+Added Pin To Net: NetName=NetC7_2 Pin=P1-18
+Added Pin To Net: NetName=NetD5_1 Pin=R1-1
+Added Room: Name=Power_Schematic
+Added Room: Name=STM
