@@ -159,9 +159,9 @@
 				6,
 				7,
 				8,
+				9,
 				10,
 				11,
-				12,
 				13,
 				14,
 				15,
@@ -187,7 +187,10 @@
 				35,
 				36,
 				37,
-				38
+				38,
+				39,
+				40,
+				41
 			]
 		},
 		{
@@ -223,7 +226,7 @@
 			"language" : "ASM",
 			"sourceIndexes" : 
 			[
-				9
+				12
 			]
 		}
 	],
@@ -290,9 +293,9 @@
 				6,
 				7,
 				8,
+				9,
 				10,
 				11,
-				12,
 				13,
 				14,
 				15,
@@ -318,14 +321,17 @@
 				35,
 				36,
 				37,
-				38
+				38,
+				39,
+				40,
+				41
 			]
 		},
 		{
 			"name" : "",
 			"sourceIndexes" : 
 			[
-				9
+				12
 			]
 		}
 	],
@@ -334,13 +340,25 @@
 		{
 			"backtrace" : 7,
 			"compileGroupIndex" : 0,
-			"path" : "Core/Src/freertos.c",
+			"path" : "Core/Src/Drivers/gpio_driver.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 7,
 			"compileGroupIndex" : 0,
-			"path" : "Core/Src/gpio_driver.c",
+			"path" : "Core/Src/Drivers/i2c_driver.c",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 7,
+			"compileGroupIndex" : 0,
+			"path" : "Core/Src/Drivers/uart_driver.c",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 7,
+			"compileGroupIndex" : 0,
+			"path" : "Core/Src/freertos.c",
 			"sourceGroupIndex" : 0
 		},
 		{
@@ -383,6 +401,12 @@
 			"backtrace" : 7,
 			"compileGroupIndex" : 0,
 			"path" : "Core/Src/system_stm32l4xx.c",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 7,
+			"compileGroupIndex" : 0,
+			"path" : "Core/Src/Utility/ring_buffer.c",
 			"sourceGroupIndex" : 0
 		},
 		{

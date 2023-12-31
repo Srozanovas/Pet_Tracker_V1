@@ -78,8 +78,11 @@ target_link_options(
 
 target_sources(
     ${TARGET_NAME} PRIVATE
+    "Core\\Src\\Drivers\\gpio_driver.c"
+    "Core\\Src\\Drivers\\i2c_driver.c"
+    "Core\\Src\\Drivers\\uart_driver.c"
+    "Core\\Src\\Drivers\\i2c_driver.c"
     "Core\\Src\\freertos.c"
-    "Core\\Src\\gpio_driver.c"
     "Core\\Src\\main.c"
     "Core\\Src\\stm32l4xx_hal_msp.c"
     "Core\\Src\\stm32l4xx_hal_timebase_tim.c"
@@ -87,6 +90,7 @@ target_sources(
     "Core\\Src\\syscalls.c"
     "Core\\Src\\sysmem.c"
     "Core\\Src\\system_stm32l4xx.c"
+    "Core\\Src\\Utility\\ring_buffer.c"
     "Core\\Startup\\startup_stm32l433rctxp.s"
     "Middlewares\\Third_Party\\FreeRTOS\\Source\\CMSIS_RTOS_V2\\cmsis_os2.c"
     "Middlewares\\Third_Party\\FreeRTOS\\Source\\croutine.c"
