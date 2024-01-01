@@ -1,9 +1,10 @@
-
+/*_______________________________INCLUDES___________________________________________________________________*/
 
 #include "i2c_driver.h"
 #include "stdbool.h"
 #include "../Drivers/gpio_driver.h"
 
+/*_______________________________DEFINES, VARIABLES, CONSTANTS__________________________________________________________________*/
 
 
 typedef struct sI2CDesc_t {
@@ -25,8 +26,6 @@ typedef struct sI2CDesc_t {
 typedef struct sI2CDescDynamic_t { 
     I2C_HandleTypeDef i2c_handle; 
 } sI2CDescDynamic_t; 
-
-
 
 const static sI2CDesc_t i2c_desc_lut[] = {
            [eI2CAcce]   = { .instance =      I2C2,
@@ -58,13 +57,18 @@ const static sI2CDesc_t i2c_desc_lut[] = {
 	                        .sda_pin = eGpioPinA10I2C1SDA,
            }
 };
+
 static sI2CDescDynamic_t i2c_desc_lut_dynamic[] = {
         [eI2CAcce] =    {.i2c_handle = {0}}, 
         [eI2CEeprom] =  {.i2c_handle = {0}}, 
 };
 
 
-bool I2C_Driver_Init(eI2C_t i2c_name) {
+
+/*_______________________________DEFINES, VARIABLES, CONSTANTS__________________________________________________________________*/
+
+
+bool I2C_Driver_Init(eI2C_t i2c_name) { //INITIALIZATION OF I2C 
     if (i2c_name >= eI2CLast){
         return false;
     }
@@ -84,14 +88,14 @@ bool I2C_Driver_Init(eI2C_t i2c_name) {
         ||(HAL_I2CEx_ConfigAnalogFilter(&i2c_desc_lut_dynamic[i2c_name].i2c_handle, i2c_desc_lut[i2c_name].analog_filter) != HAL_OK)
         ||(HAL_I2CEx_ConfigDigitalFilter(&i2c_desc_lut_dynamic[i2c_name].i2c_handle, i2c_desc_lut[i2c_name].digital_filter) != HAL_OK)
     )  Error_Handler();
-
+    
     return true; 
 
 
 }
 
 
-bool I2C_Low_Level_Init(eI2C_t i2c_name){
+bool I2C_Low_Level_Init(eI2C_t i2c_name){ //GPIO, CLOCK, INTERUPT INITIALIZATION OF I2C 
     if (GPIO_Driver_Init(i2c_desc_lut[i2c_name].sda_pin) != true){
         return false;
     }
@@ -106,6 +110,8 @@ bool I2C_Low_Level_Init(eI2C_t i2c_name){
             Error_Handler();
         }
         __HAL_RCC_I2C1_CLK_ENABLE();
+        HAL_NVIC_SetPriority(I2C1_EV_IRQn, 5, 0);
+        HAL_NVIC_EnableIRQ(I2C1_EV_IRQn);
         return true; 
     }
     if(i2c_name == eI2CAcce) {
@@ -123,56 +129,32 @@ bool I2C_Low_Level_Init(eI2C_t i2c_name){
 
 
 
+bool I2C_Driver_Send(eI2C_t I2C, uint8_t device_adress, uint16_t memory_adress, uint8_t mem_size, uint8_t *tx_data, uint8_t size){ //I2C SEND DATA
+    HAL_I2C_Mem_Write_IT(&i2c_desc_lut_dynamic[eI2CEeprom].i2c_handle, device_adress, memory_adress, mem_size, tx_data, size); 
+}
+
+bool I2C_Driver_Read(eI2C_t I2C, uint8_t device_adress, uint16_t memory_adress, uint8_t mem_size, uint8_t *rx_data, uint8_t size){  //I2C READ DATA
+    HAL_I2C_Mem_Read_IT(&i2c_desc_lut_dynamic[eI2CEeprom].i2c_handle, device_adress, memory_adress, mem_size, rx_data, size); 
+}
+
+/*_______________________________INTERUPT CALLBACKS_________________________________________________________________*/
 
 
+void HAL_I2C_MemTxCpltCallback	(I2C_HandleTypeDef *hi2c){
+    __NOP();
+}
+
+void HAL_I2C_MemRxCpltCallback(I2C_HandleTypeDef *hi2c){ 
+    __NOP();
+}
 
 
-// bool I2C_Driver_SendByte(eI2C_t i2c_name, uint8_t slave_address,  uint8_t* tx_buffer, uint8_t transfer_size, uint32_t end_mode) {
-//     LL_I2C_HandleTransfer(i2c_desc_lut[i2c_name].I2C, slave_address, LL_I2C_OWNADDRESS1_7BIT, transfer_size, end_mode, LL_I2C_GENERATE_START_WRITE);
-//     uint32_t counter=0;
-//     while (!LL_I2C_IsActiveFlag_TXE(i2c_desc_lut[i2c_name].I2C)){
-//         counter++;
-//         if (counter==10000){
-//         return false;
-//         }
-//     }
-//     for (uint8_t byte=0; byte<transfer_size; byte++){
-//         LL_I2C_TransmitData8(i2c_desc_lut[i2c_name].I2C, tx_buffer[byte]);
-//         while (!LL_I2C_IsActiveFlag_TXE(i2c_desc_lut[i2c_name].I2C)){
-//             counter++;
-//             if (counter==10000){
-//             return false;
-//             }
-//         }
-//     }
-//     return true;
-// }
-
-// bool I2C_Driver_ReadByte(eI2C_t i2c_name, uint8_t slave_address, uint8_t* rx_buffer, uint8_t read_size) {
-//       uint32_t counter=0;
-//       LL_I2C_HandleTransfer(i2c_desc_lut[i2c_name].I2C, slave_address, LL_I2C_OWNADDRESS1_7BIT, read_size, LL_I2C_MODE_AUTOEND, LL_I2C_GENERATE_START_READ);
-//       for (uint8_t byte=0; byte<read_size; byte++){
-//           while (!LL_I2C_IsActiveFlag_RXNE(i2c_desc_lut[i2c_name].I2C)){
-//               counter++;
-//               if (counter==10000){
-//                   return false;
-//               }
-//           }
-//                 rx_buffer[byte]=LL_I2C_ReceiveData8(i2c_desc_lut[i2c_name].I2C);
-//                 counter=0;
-//       }
+void I2C1_EV_IRQHandler(void){
+  HAL_I2C_EV_IRQHandler(&i2c_desc_lut_dynamic[eI2CEeprom].i2c_handle);
+}
 
 
-//       return true;
-// }
-
-
-
-
-
-
-//  uint8_t t[10]="LABAS";
-//  while (HAL_I2C_Mem_Write(&hi2c1, 0xA0, 0x00, I2C_MEMADD_SIZE_16BIT , t, 5, 5000)!=HAL_OK){}
-//  uint8_t k[10]={0};
-//  while (HAL_I2C_Mem_Read( &hi2c1, 0xA0, 0x00, I2C_MEMADD_SIZE_16BIT, k, 10, 1000) != HAL_OK){}
+void I2C2_EV_IRQHandler(void){
+    HAL_I2C_EV_IRQHandler(&i2c_desc_lut_dynamic[eI2CEeprom].i2c_handle);
+}
 

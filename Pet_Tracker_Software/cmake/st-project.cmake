@@ -81,7 +81,6 @@ target_sources(
     "Core\\Src\\Drivers\\gpio_driver.c"
     "Core\\Src\\Drivers\\i2c_driver.c"
     "Core\\Src\\Drivers\\uart_driver.c"
-    "Core\\Src\\Drivers\\i2c_driver.c"
     "Core\\Src\\freertos.c"
     "Core\\Src\\main.c"
     "Core\\Src\\stm32l4xx_hal_msp.c"
