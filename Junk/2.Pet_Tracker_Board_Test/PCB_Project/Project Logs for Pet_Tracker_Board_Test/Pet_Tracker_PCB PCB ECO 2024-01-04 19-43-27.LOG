@@ -1,0 +1,4 @@
+Added Pin To Net: NetName=PA5 Pin=P1-29
+Change Net Name : Old Net Name=PA5 New Net Name=PA12
+Added Room: Name=Modem
+Added Room: Name=Schematic
