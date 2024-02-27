@@ -26,16 +26,30 @@ int main(void)
   HAL_Init();
   SystemClock_Config();
 
-  if(GPIO_Driver_InitAll() != true){
-  }
-  if(I2C_Driver_Init(eI2CEeprom) != true){
-  }
 
-  osKernelInitialize();
-  defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
-  osKernelStart();
+
+
+
+  GPIO_Driver_Init(eGpioPinA12LEDsOn); 
+  GPIO_Driver_Init(eGpioPinA6GSMPower); 
+  GPIO_Driver_WritePin(eGpioPinA6GSMPower, ePinHigh); 
+  GPIO_Driver_Init(eGpioPinB0Power4V);
+  GPIO_Driver_WritePin(eGpioPinB0Power4V, ePinHigh); 
+  HAL_Delay(50);
+  GPIO_Driver_TogglePin(eGpioPinA6GSMPower); 
+  HAL_Delay(1000); 
+  GPIO_Driver_TogglePin(eGpioPinA6GSMPower); 
+
+
+  //osKernelInitialize();
+  //defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
+  //osKernelStart();
   
-  while (1){}
+  while (1){
+
+  
+  }
+  
 
 }
 

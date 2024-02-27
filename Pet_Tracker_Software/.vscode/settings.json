@@ -1,26 +1,7 @@
 {
   "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
   "cmake.configureOnOpen": true,
-  "cmake.sourceDirectory": [
-
-    "D:/Altiumo_Projektai/3. Pet_Tracker/Final/Pet_Tracker/Pet_Tracker_Software"], 
-  "C_Cpp.default.defines": [
-    "DEBUG",
-    "USE_HAL_DRIVER",
-    "STM32L433"
-  ],
   "files.associations": {
-    "gpio_driver.h": "c",
-    "stm32l4xx_it.h": "c",
-    "main.h": "c",
-    "stm32l4xx_hal.h": "c",
-    "stm32l4xx_hal_conf.h": "c",
-    "stm32l4xx_hal_exti.h": "c",
-    "uart_driver.h": "c",
-    "i2c_driver.h": "c"
-  },
-  "C_Cpp.default.includePath": [
-
-  ],
-  "C_Cpp.errorSquiggles": "disabled"
+    "gpio_driver.h": "c"
+  }
 }

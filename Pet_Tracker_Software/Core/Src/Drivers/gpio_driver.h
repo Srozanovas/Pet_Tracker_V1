@@ -13,17 +13,20 @@ typedef enum eGpioPin_t {
 	eGpioPinA1AcceInt = eGpioPinFirst,		//Accelerometer interupt
 	eGpioPinA2UART2TX, 		//USART2TX
 	eGpioPinA3UART2RX, 		//USART2RX 
-	eGpioPinA4GSMPower, 	//SIM868 power key 	
+	eGpioPinA4, 	
 	eGpioPinA5,				
-	eGpioPinA6,
+	eGpioPinA6GSMPower, 	//SIM868 power key
 	eGpioPinA7,
 	eGpioPinA9I2C1SCL,		//I2C1 SCl
 	eGpioPinA10I2C1SDA, 	//I2C1 SDA
 	eGpioPinA11,
-	eGpioPinA12Power4V,		//4V regulator enable
+	eGpioPinA12LEDsOn, 		//TURN ON GSM GNSS POWER AND CHARGING LEDS 
+
+
+	
 	//--------------------
 	//GPIOB---------------
-	eGpioPinB0,
+	eGpioPinB0Power4V,		//4V regulator enable
 	eGpioPinB1,
 	eGpioPinB2,
 	eGpioPinB6UART1TX,		//UART1TX 

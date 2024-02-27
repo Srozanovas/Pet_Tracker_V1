@@ -162,7 +162,7 @@
 				9,
 				10,
 				11,
-				13,
+				12,
 				14,
 				15,
 				16,
@@ -190,7 +190,8 @@
 				38,
 				39,
 				40,
-				41
+				41,
+				42
 			]
 		},
 		{
@@ -226,7 +227,7 @@
 			"language" : "ASM",
 			"sourceIndexes" : 
 			[
-				12
+				13
 			]
 		}
 	],
@@ -296,7 +297,7 @@
 				9,
 				10,
 				11,
-				13,
+				12,
 				14,
 				15,
 				16,
@@ -324,19 +325,26 @@
 				38,
 				39,
 				40,
-				41
+				41,
+				42
 			]
 		},
 		{
 			"name" : "",
 			"sourceIndexes" : 
 			[
-				12
+				13
 			]
 		}
 	],
 	"sources" : 
 	[
+		{
+			"backtrace" : 7,
+			"compileGroupIndex" : 0,
+			"path" : "Core/Src/API/eeprom_api.c",
+			"sourceGroupIndex" : 0
+		},
 		{
 			"backtrace" : 7,
 			"compileGroupIndex" : 0,

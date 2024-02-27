@@ -78,6 +78,7 @@ target_link_options(
 
 target_sources(
     ${TARGET_NAME} PRIVATE
+    "Core\\Src\\API\\eeprom_api.c"
     "Core\\Src\\Drivers\\gpio_driver.c"
     "Core\\Src\\Drivers\\i2c_driver.c"
     "Core\\Src\\Drivers\\uart_driver.c"

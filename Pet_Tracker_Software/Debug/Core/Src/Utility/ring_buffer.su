@@ -1,0 +1,3 @@
+../Core/Src/Utility/ring_buffer.c:21:6:RingBuffer_Init	24	static
+../Core/Src/Utility/ring_buffer.c:39:6:RingBuffer_Get	16	static
+../Core/Src/Utility/ring_buffer.c:59:6:RingBuffer_Put	16	static
