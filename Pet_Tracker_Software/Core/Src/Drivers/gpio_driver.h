@@ -63,7 +63,7 @@ typedef enum eGpioAllPin_t {
 
 
 
-bool GPIO_Driver_Init (eGpioPin_t gpio_pin);
+bool GPIO_Driver_Init (eGpioPin_t gpio_pin, eGpioPinState_t init_state);
 bool GPIO_Driver_TogglePin (eGpioPin_t gpio_pin);
 bool GPIO_Driver_WritePin (eGpioPin_t gpio_pin, 	eGpioPinState_t pin_state);
 bool GPIO_Driver_ReadPin (eGpioPin_t gpio_pin, 	eGpioPinState_t *pin_status);

@@ -1,4 +1,8 @@
+"./Core/Src/API/cli_function_list.o"
+"./Core/Src/API/cmd_api.o"
 "./Core/Src/API/eeprom_api.o"
+"./Core/Src/API/uart_api.o"
+"./Core/Src/APP/cli_app.o"
 "./Core/Src/Drivers/gpio_driver.o"
 "./Core/Src/Drivers/i2c_driver.o"
 "./Core/Src/Drivers/uart_driver.o"

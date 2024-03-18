@@ -68,8 +68,8 @@ const static sUartDesc_t uart_desc_lut[] = {
 };
 
 static sUartDescDynamic_t uart_desc_lut_dynamic[] = {
-    [eUartDebug] = {.rb_handle = NULL,  .uart_handle = {0},   .baudRate = eBaudRateLast, .uart_set_flag = NULL,     .rx_data = 0},
-    [eUartModem] = {.rb_handle = NULL,  .uart_handle = {0},   .baudRate = eBaudRateLast, .uart_set_flag = NULL,     .rx_data = 0},
+     [eUartDebug] = {.rb_handle = NULL,  .uart_handle = {0},   .baudRate = eBaudRateLast, .uart_set_flag = NULL,     .rx_data = 0},
+     [eUartModem] = {.rb_handle = NULL,  .uart_handle = {0},   .baudRate = eBaudRateLast, .uart_set_flag = NULL,     .rx_data = 0},
 };
 
 const static uint32_t uart_baudrate_lut[] = {
@@ -88,15 +88,16 @@ const static uint32_t uart_baudrate_lut[] = {
 
 
 
-bool UART_Driver_Init (eUart_t uart, eBaudRate_t baudrate) { //INITIALIZE UART 
+bool UART_Driver_Init (eUart_t uart, eBaudRate_t baudrate, bool(*function_pointer)(eUart_t)) { //INITIALIZE UART 
     if (uart >= eUartLast) {
         return false;
     }
     if (baudrate >= eBaudRateLast) {
         return false;
     }
-
-    UART_Driver_Low_Level_Init(uart);
+    if (UART_Driver_Low_Level_Init(uart) == false){ 
+        return false; 
+    }
     uart_desc_lut_dynamic[uart].uart_handle.Instance = uart_desc_lut[uart].instance;
     uart_desc_lut_dynamic[uart].uart_handle.Init.BaudRate = uart_baudrate_lut[baudrate]; 
     uart_desc_lut_dynamic[uart].uart_handle.Init.WordLength = uart_desc_lut[uart].word_length; 
@@ -112,6 +113,7 @@ bool UART_Driver_Init (eUart_t uart, eBaudRate_t baudrate) { //INITIALIZE UART
     {
         Error_Handler();
     }
+    uart_desc_lut_dynamic[uart].uart_set_flag = function_pointer;
 
     HAL_UART_Receive_IT(&uart_desc_lut_dynamic[uart].uart_handle, uart_desc_lut_dynamic[uart].rx_data, 1); 
     return true; 
@@ -121,10 +123,10 @@ bool UART_Driver_Init (eUart_t uart, eBaudRate_t baudrate) { //INITIALIZE UART
 bool UART_Driver_Low_Level_Init(eUart_t uart)
 {
     //INIT CLOCKS AND RING BUFFER
-    if (GPIO_Driver_Init(uart_desc_lut[uart].tx_pin) == false) {
+    if (GPIO_Driver_Init(uart_desc_lut[uart].tx_pin, ePinLow) == false) {
         return false;
     }
-    if (GPIO_Driver_Init(uart_desc_lut[uart].rx_pin) == false) {
+    if (GPIO_Driver_Init(uart_desc_lut[uart].rx_pin, ePinLow) == false) {
         return false;
     }
     if (RingBuffer_Init(&uart_desc_lut_dynamic[uart].rb_handle, RING_BUFFER_SIZE) == false) {
@@ -163,10 +165,16 @@ bool UART_Driver_Low_Level_Init(eUart_t uart)
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){ //SAVE 1 BYTE OF DATA TO RING BUFFER
     if((*huart).Instance==uart_desc_lut_dynamic[eUartDebug].uart_handle.Instance){
         RingBuffer_Put(uart_desc_lut_dynamic[eUartDebug].rb_handle, uart_desc_lut_dynamic[eUartDebug].rx_data[0]);
+        if (uart_desc_lut_dynamic[eUartDebug].rx_data[0] == (uint8_t)('\n')) {
+            uart_desc_lut_dynamic[eUartDebug].uart_set_flag(eUartDebug);
+        }
         HAL_UART_Receive_IT(&uart_desc_lut_dynamic[eUartDebug].uart_handle, uart_desc_lut_dynamic[eUartDebug].rx_data, 1);
     } 
     if((*huart).Instance==uart_desc_lut_dynamic[eUartModem].uart_handle.Instance){
         RingBuffer_Put(uart_desc_lut_dynamic[eUartModem].rb_handle, uart_desc_lut_dynamic[eUartDebug].rx_data[0]);
+        if (uart_desc_lut_dynamic[eUartModem].rx_data[0] == (uint8_t)('\n')) {
+            uart_desc_lut_dynamic[eUartModem].uart_set_flag(eUartModem);
+        }
         HAL_UART_Receive_IT(&uart_desc_lut_dynamic[eUartModem].uart_handle, uart_desc_lut_dynamic[eUartDebug].rx_data, 1);
     } 
  }
@@ -184,7 +192,7 @@ bool UART_Driver_GetByte (eUart_t uart, uint8_t *byte) {    //GET 1 BYTE OF DATA
 
 
 bool UART_Driver_Send_String () {   //SEND MESSAGE THROUGH UART
-    HAL_UART_Transmit_IT(&uart_desc_lut_dynamic[eUartDebug].uart_handle, "Labas\n", sizeof("Labas\n"));
+    //HAL_UART_Transmit_IT(&uart_desc_lut_dynamic[eUartDebug].uart_handle, "Labas\n", sizeof("Labas\n"));
     return true;
 }
 

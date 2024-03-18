@@ -96,10 +96,10 @@ bool I2C_Driver_Init(eI2C_t i2c_name) { //INITIALIZATION OF I2C
 
 
 bool I2C_Low_Level_Init(eI2C_t i2c_name){ //GPIO, CLOCK, INTERUPT INITIALIZATION OF I2C 
-    if (GPIO_Driver_Init(i2c_desc_lut[i2c_name].sda_pin) != true){
+    if (GPIO_Driver_Init(i2c_desc_lut[i2c_name].sda_pin, ePinLow) != true){
         return false;
     }
-    if (GPIO_Driver_Init(i2c_desc_lut[i2c_name].scl_pin) != true) {
+    if (GPIO_Driver_Init(i2c_desc_lut[i2c_name].scl_pin, ePinLow) != true) {
         return false;
     }
     RCC_PeriphCLKInitTypeDef PeriphClkInit = {0};

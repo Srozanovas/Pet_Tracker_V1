@@ -8,34 +8,34 @@
 		},
 		"paths" : 
 		{
-			"cmake" : "C:/Users/ponas/AppData/Roaming/Code/User/globalStorage/ms-vscode.vscode-embedded-tools/vcpkg/root/downloads/artifacts/vcpkg-ce-default/tools.kitware.cmake/3.20.1/bin/cmake.exe",
-			"cpack" : "C:/Users/ponas/AppData/Roaming/Code/User/globalStorage/ms-vscode.vscode-embedded-tools/vcpkg/root/downloads/artifacts/vcpkg-ce-default/tools.kitware.cmake/3.20.1/bin/cpack.exe",
-			"ctest" : "C:/Users/ponas/AppData/Roaming/Code/User/globalStorage/ms-vscode.vscode-embedded-tools/vcpkg/root/downloads/artifacts/vcpkg-ce-default/tools.kitware.cmake/3.20.1/bin/ctest.exe",
-			"root" : "C:/Users/ponas/AppData/Roaming/Code/User/globalStorage/ms-vscode.vscode-embedded-tools/vcpkg/root/downloads/artifacts/vcpkg-ce-default/tools.kitware.cmake/3.20.1/share/cmake-3.20"
+			"cmake" : "C:/Program Files/CMake/bin/cmake.exe",
+			"cpack" : "C:/Program Files/CMake/bin/cpack.exe",
+			"ctest" : "C:/Program Files/CMake/bin/ctest.exe",
+			"root" : "C:/Program Files/CMake/share/cmake-3.29"
 		},
 		"version" : 
 		{
 			"isDirty" : false,
 			"major" : 3,
-			"minor" : 20,
+			"minor" : 29,
 			"patch" : 0,
-			"string" : "3.20.0",
-			"suffix" : ""
+			"string" : "3.29.0-rc1",
+			"suffix" : "rc1"
 		}
 	},
 	"objects" : 
 	[
 		{
-			"jsonFile" : "codemodel-v2-25cf1728e5c479544891.json",
+			"jsonFile" : "codemodel-v2-9933355c184c50d305cb.json",
 			"kind" : "codemodel",
 			"version" : 
 			{
 				"major" : 2,
-				"minor" : 2
+				"minor" : 7
 			}
 		},
 		{
-			"jsonFile" : "cache-v2-fe73ca7b404e26174b7b.json",
+			"jsonFile" : "cache-v2-7570d729a61c4e98868e.json",
 			"kind" : "cache",
 			"version" : 
 			{
@@ -44,7 +44,7 @@
 			}
 		},
 		{
-			"jsonFile" : "cmakeFiles-v1-1f44715d3051eb834beb.json",
+			"jsonFile" : "cmakeFiles-v1-c9cce7ab70a3c03c9ae3.json",
 			"kind" : "cmakeFiles",
 			"version" : 
 			{
@@ -53,7 +53,7 @@
 			}
 		},
 		{
-			"jsonFile" : "toolchains-v1-c451691d686612b558a3.json",
+			"jsonFile" : "toolchains-v1-849811eae68c98f3281a.json",
 			"kind" : "toolchains",
 			"version" : 
 			{
@@ -90,7 +90,7 @@
 				"responses" : 
 				[
 					{
-						"jsonFile" : "cache-v2-fe73ca7b404e26174b7b.json",
+						"jsonFile" : "cache-v2-7570d729a61c4e98868e.json",
 						"kind" : "cache",
 						"version" : 
 						{
@@ -99,16 +99,16 @@
 						}
 					},
 					{
-						"jsonFile" : "codemodel-v2-25cf1728e5c479544891.json",
+						"jsonFile" : "codemodel-v2-9933355c184c50d305cb.json",
 						"kind" : "codemodel",
 						"version" : 
 						{
 							"major" : 2,
-							"minor" : 2
+							"minor" : 7
 						}
 					},
 					{
-						"jsonFile" : "toolchains-v1-c451691d686612b558a3.json",
+						"jsonFile" : "toolchains-v1-849811eae68c98f3281a.json",
 						"kind" : "toolchains",
 						"version" : 
 						{
@@ -117,7 +117,7 @@
 						}
 					},
 					{
-						"jsonFile" : "cmakeFiles-v1-1f44715d3051eb834beb.json",
+						"jsonFile" : "cmakeFiles-v1-c9cce7ab70a3c03c9ae3.json",
 						"kind" : "cmakeFiles",
 						"version" : 
 						{

@@ -3,11 +3,11 @@
 #include "cmsis_os.h"
 
 
-#include "Drivers/gpio_driver.h"
-#include "Drivers/uart_driver.h"
-#include "Utility/ring_bufer.h"
-#include "Drivers/i2c_driver.h"
-
+#include "gpio_driver.h"
+#include "uart_driver.h"
+#include "ring_bufer.h"
+#include "i2c_driver.h"
+#include "uart_api.h"
 
 
 
@@ -25,26 +25,18 @@ int main(void)
 {
   HAL_Init();
   SystemClock_Config();
+  UART_API_Init(eUartModem, eBaudRate9600 );
+  UART_API_Init(eUartDebug, eBaudRate9600 );
+  GPIO_Driver_Init(eGpioPinA12LEDsOn, ePinLow);
 
-
-
-
-
-  GPIO_Driver_Init(eGpioPinA12LEDsOn); 
-  GPIO_Driver_Init(eGpioPinA6GSMPower); 
-  GPIO_Driver_WritePin(eGpioPinA6GSMPower, ePinHigh); 
-  GPIO_Driver_Init(eGpioPinB0Power4V);
-  GPIO_Driver_WritePin(eGpioPinB0Power4V, ePinHigh); 
-  HAL_Delay(50);
-  GPIO_Driver_TogglePin(eGpioPinA6GSMPower); 
-  HAL_Delay(1000); 
-  GPIO_Driver_TogglePin(eGpioPinA6GSMPower); 
-
-
-  //osKernelInitialize();
-  //defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
-  //osKernelStart();
+  osKernelInitialize();
+  defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
+  osKernelStart();
   
+
+
+
+
   while (1){
 
   

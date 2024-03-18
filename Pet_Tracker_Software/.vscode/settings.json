@@ -2,6 +2,9 @@
   "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
   "cmake.configureOnOpen": true,
   "files.associations": {
-    "gpio_driver.h": "c"
+    "gpio_driver.h": "c",
+    "uart_driver.h": "c",
+    "cmsis_os.h": "c",
+    "uart_api.h": "c"
   }
 }

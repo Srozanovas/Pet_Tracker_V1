@@ -1,7 +1,7 @@
 ../Core/Src/Drivers/uart_driver.c:91:6:UART_Driver_Init	16	static
-../Core/Src/Drivers/uart_driver.c:121:6:UART_Driver_Low_Level_Init	120	static
-../Core/Src/Drivers/uart_driver.c:163:6:HAL_UART_RxCpltCallback	16	static
-../Core/Src/Drivers/uart_driver.c:175:6:UART_Driver_GetByte	16	static
-../Core/Src/Drivers/uart_driver.c:186:6:UART_Driver_Send_String	8	static
-../Core/Src/Drivers/uart_driver.c:194:6:USART2_IRQHandler	8	static
-../Core/Src/Drivers/uart_driver.c:198:6:USART1_IRQHandler	8	static
+../Core/Src/Drivers/uart_driver.c:123:6:UART_Driver_Low_Level_Init	120	static
+../Core/Src/Drivers/uart_driver.c:165:6:HAL_UART_RxCpltCallback	16	static
+../Core/Src/Drivers/uart_driver.c:183:6:UART_Driver_GetByte	16	static
+../Core/Src/Drivers/uart_driver.c:194:6:UART_Driver_Send_String	4	static
+../Core/Src/Drivers/uart_driver.c:202:6:USART2_IRQHandler	8	static
+../Core/Src/Drivers/uart_driver.c:206:6:USART1_IRQHandler	8	static

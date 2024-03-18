@@ -39,7 +39,7 @@ const static sGpioDesc_t gpio_desc_lut[] = {
     [eGpioPinA11]           = {.port = GPIOA, .pin = GPIO_PIN_11,   .mode = GPIO_MODE_OUTPUT_PP,    .speed = GPIO_SPEED_FREQ_LOW,       .pull = GPIO_NOPULL, .alternate = 0,                .interupt_enable = false,   .interupt=0xFF          },
     [eGpioPinA12LEDsOn]     = {.port = GPIOA, .pin = GPIO_PIN_12,   .mode = GPIO_MODE_OUTPUT_PP,    .speed = GPIO_SPEED_FREQ_LOW,       .pull = GPIO_NOPULL, .alternate = 0,                .interupt_enable = false,   .interupt=0xFF          },
     //GPIOB______________________________________________________________________________________________________________________________________________________________________________________________________________________________________
-    [eGpioPinB0Power4V]     = {.port = GPIOB, .pin = GPIO_PIN_0,    .mode = GPIO_MODE_IT_FALLING,   .speed = GPIO_SPEED_FREQ_LOW,       .pull = GPIO_PULLUP, .alternate = 0,                .interupt_enable = true,    .interupt=0xFF          },
+    [eGpioPinB0Power4V]     = {.port = GPIOB, .pin = GPIO_PIN_0,    .mode = GPIO_MODE_OUTPUT_PP,    .speed = GPIO_SPEED_FREQ_LOW,       .pull = GPIO_NOPULL, .alternate = 0,                .interupt_enable = false,   .interupt=0xFF          },
     [eGpioPinB1]            = {.port = GPIOB, .pin = GPIO_PIN_1,    .mode = GPIO_MODE_OUTPUT_PP,    .speed = GPIO_SPEED_FREQ_LOW,       .pull = GPIO_NOPULL, .alternate = 0,                .interupt_enable = false,   .interupt=0xFF          },
     [eGpioPinB2]            = {.port = GPIOB, .pin = GPIO_PIN_2,    .mode = GPIO_MODE_OUTPUT_PP,    .speed = GPIO_SPEED_FREQ_LOW,       .pull = GPIO_NOPULL, .alternate = 0,                .interupt_enable = false,   .interupt=0xFF          },
     [eGpioPinB6UART1TX]     = {.port = GPIOB, .pin = GPIO_PIN_6,    .mode = GPIO_MODE_AF_PP,        .speed = GPIO_SPEED_FREQ_VERY_HIGH, .pull = GPIO_NOPULL, .alternate = GPIO_AF7_USART1,  .interupt_enable = false,   .interupt=0xFF          },
@@ -61,21 +61,24 @@ const static sGpioDesc_t gpio_desc_lut[] = {
 
 
 
-bool GPIO_Driver_Init (eGpioPin_t gpio_pin) {  //GPIO PIN INITIALIZATION
+bool GPIO_Driver_Init (eGpioPin_t gpio_pin, eGpioPinState_t init_state) {  //GPIO PIN INITIALIZATION
 
     //UNDEFINED PIN 
 
     if (gpio_pin >= eGpioPinLast) {
         return false;
     }
+    if (init_state >= ePinNaN){
+        return false; 
+    }
 
     GPIO_InitTypeDef gpio_init_struct = {0};
 
     //CLOCKS ENABLE 
 
-    if (rtc_clock_enabled&RTC_H_CLOCK_ENABLED==0){
+    if ((rtc_clock_enabled&RTC_H_CLOCK_ENABLED)==0){
         __HAL_RCC_GPIOH_CLK_ENABLE();
-        rtc_clock_enabled&=RTC_H_CLOCK_ENABLED;      
+        rtc_clock_enabled|=RTC_H_CLOCK_ENABLED;      
     }
     switch ((int)(gpio_desc_lut[gpio_pin].port)){
         case (int)(GPIOA):{
@@ -103,7 +106,7 @@ bool GPIO_Driver_Init (eGpioPin_t gpio_pin) {  //GPIO PIN INITIALIZATION
     }
 
     //GPIO STRUCT FORMATION
-
+    
     HAL_GPIO_WritePin(gpio_desc_lut[gpio_pin].port, gpio_desc_lut[gpio_pin].pin, GPIO_PIN_RESET);
     gpio_init_struct.Pin = gpio_desc_lut[gpio_pin].pin;
     gpio_init_struct.Mode = gpio_desc_lut[gpio_pin].mode;
@@ -118,6 +121,8 @@ bool GPIO_Driver_Init (eGpioPin_t gpio_pin) {  //GPIO PIN INITIALIZATION
         HAL_NVIC_SetPriority(gpio_desc_lut[gpio_pin].interupt, 5, 0);
         HAL_NVIC_EnableIRQ(gpio_desc_lut[gpio_pin].interupt);
     }
+
+    if (init_state == ePinHigh) HAL_GPIO_WritePin(gpio_desc_lut[gpio_pin].port, gpio_desc_lut[gpio_pin].pin, GPIO_PIN_SET);
     
     return true;
 }
@@ -167,7 +172,7 @@ bool GPIO_Driver_ReadPin (eGpioPin_t gpio_pin, eGpioPinState_t *pin_status) {   
 bool GPIO_Driver_InitAll (void) {   //INIT ALL PINS
     eGpioAllPin_t all_good = eGpioAllPinsOK;
     for (eGpioPin_t pin = eGpioPinFirst; pin < eGpioPinLast; pin++) {
-        if (GPIO_Driver_Init(pin) == false) {
+        if (GPIO_Driver_Init(pin, ePinLow) == false) {
             all_good = eGpioAllPinsNotOk;
         }
     }

@@ -1,0 +1,6 @@
+../Core/Src/API/uart_api.c:65:6:UART_API_Init	24	static
+../Core/Src/API/uart_api.c:125:6:UART_API_Thread	40	static
+../Core/Src/API/uart_api.c:179:6:UART_API_SendString	16	static
+../Core/Src/API/uart_api.c:192:6:UART_API_GetMessage	24	static
+../Core/Src/API/uart_api.c:199:10:UART_API_WaitFlag	16	static
+../Core/Src/API/uart_api.c:204:6:UART_API_SetFlag	16	static

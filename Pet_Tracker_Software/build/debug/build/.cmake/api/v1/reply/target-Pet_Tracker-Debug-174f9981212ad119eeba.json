@@ -43,13 +43,13 @@
 			{
 				"command" : 1,
 				"file" : 1,
-				"line" : 66,
+				"line" : 70,
 				"parent" : 2
 			},
 			{
 				"command" : 3,
 				"file" : 1,
-				"line" : 36,
+				"line" : 40,
 				"parent" : 2
 			},
 			{
@@ -67,7 +67,7 @@
 			{
 				"command" : 6,
 				"file" : 1,
-				"line" : 79,
+				"line" : 83,
 				"parent" : 2
 			}
 		]
@@ -120,6 +120,22 @@
 				},
 				{
 					"backtrace" : 6,
+					"path" : "D:/Altiumo_Projektai/3. Pet_Tracker/Final/Pet_Tracker/Pet_Tracker_Software/Core/Src/Drivers"
+				},
+				{
+					"backtrace" : 6,
+					"path" : "D:/Altiumo_Projektai/3. Pet_Tracker/Final/Pet_Tracker/Pet_Tracker_Software/Core/Src/Utility"
+				},
+				{
+					"backtrace" : 6,
+					"path" : "D:/Altiumo_Projektai/3. Pet_Tracker/Final/Pet_Tracker/Pet_Tracker_Software/Core/Src/APP"
+				},
+				{
+					"backtrace" : 6,
+					"path" : "D:/Altiumo_Projektai/3. Pet_Tracker/Final/Pet_Tracker/Pet_Tracker_Software/Core/Src/API"
+				},
+				{
+					"backtrace" : 6,
 					"path" : "D:/Altiumo_Projektai/3. Pet_Tracker/Final/Pet_Tracker/Pet_Tracker_Software/Drivers/STM32L4xx_HAL_Driver/Inc"
 				},
 				{
@@ -163,10 +179,10 @@
 				10,
 				11,
 				12,
+				13,
 				14,
 				15,
 				16,
-				17,
 				18,
 				19,
 				20,
@@ -191,7 +207,11 @@
 				39,
 				40,
 				41,
-				42
+				42,
+				43,
+				44,
+				45,
+				46
 			]
 		},
 		{
@@ -227,7 +247,7 @@
 			"language" : "ASM",
 			"sourceIndexes" : 
 			[
-				13
+				17
 			]
 		}
 	],
@@ -298,10 +318,10 @@
 				10,
 				11,
 				12,
+				13,
 				14,
 				15,
 				16,
-				17,
 				18,
 				19,
 				20,
@@ -326,14 +346,18 @@
 				39,
 				40,
 				41,
-				42
+				42,
+				43,
+				44,
+				45,
+				46
 			]
 		},
 		{
 			"name" : "",
 			"sourceIndexes" : 
 			[
-				13
+				17
 			]
 		}
 	],
@@ -342,7 +366,31 @@
 		{
 			"backtrace" : 7,
 			"compileGroupIndex" : 0,
+			"path" : "Core/Src/API/cli_function_list.c",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 7,
+			"compileGroupIndex" : 0,
+			"path" : "Core/Src/API/cmd_api.c",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 7,
+			"compileGroupIndex" : 0,
 			"path" : "Core/Src/API/eeprom_api.c",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 7,
+			"compileGroupIndex" : 0,
+			"path" : "Core/Src/API/uart_api.c",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 7,
+			"compileGroupIndex" : 0,
+			"path" : "Core/Src/APP/cli_app.c",
 			"sourceGroupIndex" : 0
 		},
 		{
