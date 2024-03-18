@@ -9,13 +9,27 @@
 #include "uart_api.h"
 #include "cli_function_list.h"
 
-typedef enum eCommand   ~!
+
+typedef enum eCommandModules_t { 
+    eCommandModulesFirst = 0, 
+    eCommandModulesModem = eCommandModulesFirst, 
+    eCommandModulesLED, 
+    eCommandModulesPCUART, 
+    eCommandModulesPower, 
+    eCommandModulesAcce, 
+    eCommandModulesEEPROM,
+    eCommandModulesLast,
+    eCommandModulesERROR
+} eCommandModules_t;
+
 
 
 
 
 typedef struct sCommandParameters_t {
-    
+   eCommandModules_t module; 
+   uint8_t command; 
+   char *params; 
 } sCommandParameters_t;
 
 

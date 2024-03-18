@@ -49,7 +49,7 @@ typedef struct sUartData_t {
 bool UART_API_Init (eUart_t uart_id, eBaudRate_t baudrate);
 void UART_API_Thread (void *argument);
 bool UART_API_SendString (eUart_t uart,char *string, uint16_t size );
-bool UART_API_GetMessage (sUartData_t *acquired_buffer, eUart_t uart, uint32_t wait_time);
+bool UART_API_GetMessage (sUartData_t *acquired_buffer, uint32_t wait_time);
 bool UART_API_SetFlag(eUart_t uart);
 
 

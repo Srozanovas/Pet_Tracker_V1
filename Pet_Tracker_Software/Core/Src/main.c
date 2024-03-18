@@ -19,14 +19,25 @@ const osThreadAttr_t defaultTask_attributes = {
 };
 
 
+
+
+uint32_t pt_status = 0x00;
+
+
+
+
+
+
 void SystemClock_Config(void);
 void StartDefaultTask(void *argument);
 int main(void)
 {
   HAL_Init();
   SystemClock_Config();
-  UART_API_Init(eUartModem, eBaudRate9600 );
-  UART_API_Init(eUartDebug, eBaudRate9600 );
+  if (UART_API_Init(eUartDebug, eBaudRate9600)) pt_status |= DEBUG_UART_ENABLED;
+  else (pt_status &= ~DEBUG_UART_ENABLED);
+  if (UART_API_Init(eUartModem, eBaudRate9600)) pt_status |= MODEM_UART_ENABLED;
+  else (pt_status &= ~MODEM_UART_ENABLED);
   GPIO_Driver_Init(eGpioPinA12LEDsOn, ePinLow);
 
   osKernelInitialize();

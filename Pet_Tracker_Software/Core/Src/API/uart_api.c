@@ -27,13 +27,13 @@ const osThreadAttr_t uart_api_thread_atr = {
     .stack_size = 1024,
     .priority = osPriorityHigh
 };
-const osMessageQueueAttr_t uart_data_queue_atr_debug = {.name = "uart_data_queue"};
+const osMessageQueueAttr_t uart_data_queue_atr= {.name = "uart_data_queue"};
 osMessageQId uart_data_queue_id;
 const osMutexAttr_t debug_send_string_mutex_atr    = {.name = "debug_send_string_mutex"};
 const osMutexAttr_t modem_send_string_mutex_atr    = {.name = "modem_send_string_mutex"};
 osEventFlagsId_t uart_flags = NULL;
 osThreadId_t uart_thread_id = NULL;
-sUartData_t message = {0};
+sUartData_t uart_data = {0};
 
 
 //UART DATA STRUCTURES. 
@@ -62,6 +62,7 @@ static sUartControl_t uart_buffer_lut[] = {
 uint32_t UART_API_WaitFlag ();
 
 
+
 bool UART_API_Init (eUart_t uart_id, eBaudRate_t baudrate) {
     
     //INITIALIZE UART FLAGS TO KNOW WHEN EXTRACT MESSAGES
@@ -69,27 +70,27 @@ bool UART_API_Init (eUart_t uart_id, eBaudRate_t baudrate) {
     if (uart_flags == NULL) {
         uart_flags = osEventFlagsNew(NULL);
         if (uart_flags == NULL) {
-            return false;
+        	return false;
         }
     }
 
     //INITIALIZE UART DRIVER AND GIVE SETFLAG FUNCTION 
     if (UART_Driver_Init(uart_id, baudrate, &UART_API_SetFlag) != true) {
-        return false;
+    	return false;
     }
 
 
     //CREATE MUTEX'ES FOR THREADS TO USE 
     uart_buffer_lut[uart_id].mutex_id = osMutexNew(uart_buffer_lut[uart_id].mutex_atr);
     if (uart_buffer_lut[uart_id].mutex_id == NULL) {
-        return false;
+    	return false;
     }
 
     //CREATE MESSAGE QUEES TO PUT MESSAGES FOR CMD API 
     if (uart_data_queue_id == NULL){ 
-        uart_data_queue_id = osMessageQueueNew(UART_QUEUE_SIZE, sizeof(sUartData_t), &uart_data_queue_atr_debug);
+        uart_data_queue_id = osMessageQueueNew(UART_QUEUE_SIZE, sizeof(sUartData_t), &uart_data_queue_atr);
         if (uart_data_queue_id == NULL) {
-            return false;
+        	return false;
         }
     }
     
@@ -97,7 +98,7 @@ bool UART_API_Init (eUart_t uart_id, eBaudRate_t baudrate) {
     //INITIALIZE CMD THREAD FOR CUTTING UART DATA INTO COMMANDS 
 
     if (CMD_API_ThreadInit() == false){ 
-        return false; 
+    	return false;
     }
 
 
@@ -106,19 +107,10 @@ bool UART_API_Init (eUart_t uart_id, eBaudRate_t baudrate) {
     if (uart_thread_id == NULL) {
         uart_thread_id = osThreadNew(UART_API_Thread, NULL, &uart_api_thread_atr);
         if (uart_thread_id == NULL) {
-            //error("Cannot Innitialize UART_API_Thread");
             return false;
         }
     }
     
-
-
-   // if (uart_interupt_id == NULL) {
-     //   uart_interupt_id = osThreadNew(UART_Interupt_Thread, NULL, &uart_interupt_thread_atr);
-    //    if (uart_interupt_id == NULL){
-      //      return false;
-   //     }
-   // }
     return true;
 }
 
@@ -155,9 +147,9 @@ void UART_API_Thread (void *argument) {
                     }
                 }
                 case eUartStateSend:
-                    message.buffer_adress = (char*)uart_buffer_lut[uart].buffer;
-                    message.size = uart_buffer_lut[uart].index;
-                    if (osMessageQueuePut(uart_data_queue_id, &message, osPriorityHigh, UART_QUEUE_PUT_TIMEOUT) != osOK) {
+                    uart_data.buffer_adress = (char*)uart_buffer_lut[uart].buffer;
+                    uart_data.size = uart_buffer_lut[uart].index;
+                    if (osMessageQueuePut(uart_data_queue_id, &uart_data, osPriorityHigh, UART_QUEUE_PUT_TIMEOUT) != osOK) {
 
                     }
                     uart_buffer_lut[uart].state = eUartStateInit;
@@ -189,7 +181,7 @@ bool UART_API_SendString (eUart_t uart, char *string, uint16_t size) {
 }
 
 
-bool UART_API_GetMessage (sUartData_t *acquired_buffer, eUart_t uart, uint32_t wait_time) {
+bool UART_API_GetMessage (sUartData_t *acquired_buffer, uint32_t wait_time) {
     if (osMessageQueueGet(uart_data_queue_id, acquired_buffer, NULL, wait_time) != osOK) {
         return false;
     }

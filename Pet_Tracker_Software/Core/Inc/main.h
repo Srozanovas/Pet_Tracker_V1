@@ -29,9 +29,15 @@ extern "C" {
 /* Includes ------------------------------------------------------------------*/
 #include "stm32l4xx_hal.h"
 
+
+
+
+
+
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#define DEBUG_UART_ENABLED	(1<<0)
+#define MODEM_UART_ENABLED	(1<<1)
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/

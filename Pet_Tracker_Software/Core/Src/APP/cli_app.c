@@ -50,7 +50,7 @@ bool CLI_APP_Init (void) {
 
 void CLI_APP_Thread (void *argument) {
     while (true) {
-        if (UART_API_GetMessage(&message_buffer, eUartDebug, osWaitForever) == true) {
+        if (UART_API_GetMessage(&message_buffer, osWaitForever) == true) {
             // //ACC_API_Suspend();
             // cli_app_command_struct.buffer_adress = message_buffer.buffer_adress;
             // cli_app_command_struct.buffer_size = message_buffer.size;
