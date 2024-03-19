@@ -1,60 +1,35 @@
 #ifndef __CLI_FUNCTION_LIST__H__
 #define __CLI_FUNCTION_LIST__H__
 
-/**********************************************************************************************************************
- * Includes
- *********************************************************************************************************************/
+
 #include "stdbool.h"
 #include "main.h"
 
-/**********************************************************************************************************************
- * Exported definitions and macros
- *********************************************************************************************************************/
-typedef struct sCommandResponse_t {
-    char *message_command;
-    uint8_t command_length;
-    char *message_args;
-    uint8_t args_length;
-    char *response_buffer;
-    uint8_t response_buffer_length;
-} sCommandResponse_t;
 
-typedef struct sFunctionName_t {
+
+typedef struct sCommandFunctions_t {
     char *name;
-    uint8_t name_length;
-    bool (*function_pointer) (sCommandResponse_t*);
-} sFunctionName_t;
-
-typedef enum eFunctionListCLI_t {
-        eFunctionListCLIFirst = 0,
-		eFunctionListCLIModemSendCommand,
-		eFunctionListCLIModemSendSMS,
-		eFunctionListCLIModemReadSMS,
-		eFunctionListCLIModemConfig,
-        eFunctionListCLILast
-} eFunctionListCLI_t;
+    bool (*function_pointer) (char * func_params);
+} sCommandFunctions_t;
 
 
-
-extern const sFunctionName_t function_lut_cli[eFunctionListCLILast];
-
-/**********************************************************************************************************************
- * Exported types
- *********************************************************************************************************************/
-
-/**********************************************************************************************************************
- * Exported variables
- *********************************************************************************************************************/
-
-/**********************************************************************************************************************
- * Prototypes of exported functions
- *********************************************************************************************************************/
+//FUNCTION ENUMS 
 
 
-bool CMD_API_ModemSendCommand(sCommandResponse_t *command_response);
-bool CMD_API_ModemSendSMS(sCommandResponse_t *command_response);
-bool CMD_API_ModemReadSMS(sCommandResponse_t *command_response);
-bool CMD_API_ModemConfig(sCommandResponse_t *command_response);
+typedef enum eModemCommands_t { 
+    eModemCommandsFirst = 0, 
+    eModemCommandsPower = eModemCommandsFirst, 
+    eModemCommandsGNSSPower, 
+    eModemCommandsLast
+} eModemCommands_t;
+
+
+
+
+
+extern const sCommandFunctions_t modem_command_function_lut[eModemCommandsLast];
+
+uint8_t Command_Functions_Get_Function_Number (eModemCommands_t module, char * command_name); 
 
 
 #endif /* __CMD_LIST__H__ */

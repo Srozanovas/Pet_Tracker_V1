@@ -7,7 +7,7 @@
 #include "stdio.h"
 //#include "string_utility.h"
 #include "uart_api.h"
-#include "cli_function_list.h"
+
 
 
 typedef enum eCommandModules_t { 

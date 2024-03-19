@@ -2,33 +2,16 @@
  * Includes
  *********************************************************************************************************************/
 #include "cli_function_list.h"
-//#include "modem_api.h"
-//#include "cli_app.h"
 #include "string.h"
 #include "stdlib.h"
-//#include "debug_api.h"
-//#include "accelerometer_api.h"
-/**********************************************************************************************************************
- * Private definitions and macros
- *********************************************************************************************************************/
-#define NAME(string) .name=#string , .name_length = sizeof(#string)
-#define MAX_LENGTH 500
-/**********************************************************************************************************************
- * Private typedef
- *********************************************************************************************************************/
 
-/**********************************************************************************************************************
- * Private constants
- *********************************************************************************************************************/
 
-const sFunctionName_t function_lut_cli[] = {
-	[eFunctionListCLIModemSendCommand] = {NAME(modem_send_command), .function_pointer = &CMD_API_ModemSendCommand},
-	[eFunctionListCLIModemSendSMS] = {NAME(modem_send_sms), .function_pointer = &CMD_API_ModemSendSMS},
-	[eFunctionListCLIModemReadSMS] = {NAME(modem_read_sms), .function_pointer = &CMD_API_ModemReadSMS},
-	[eFunctionListCLIModemConfig]  = {NAME(modem_config), .function_pointer = &CMD_API_ModemConfig},
+#include "modem_api.h"
+
+const sCommandFunctions_t modem_command_function_lut[eModemCommandsLast] = {
+	[eModemCommandsPower] 		= {.name = "POWER",			.function_pointer = &Modem_API_Power},
+	[eModemCommandsGNSSPower]	= {.name = "GNSSPOWER", 	.function_pointer = &Modem_API_GNSS_Power},
 };
-
-
 
 
 

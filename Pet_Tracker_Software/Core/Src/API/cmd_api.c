@@ -3,7 +3,9 @@
 #include "cmsis_os.h"
 #include "uart_api.h"
 #include "string.h"
-//#include "debug_api.h"
+
+#include "power_api.h"
+#include "cli_function_list.h"
 
 #define COMMAND_QUEUE_SIZE 10
 #define COMMANDS_QUEUE_PUT_TIMEOUT 100
@@ -23,13 +25,11 @@ osMessageQId commands_queue_id;
 //DATA VARIABLES
 sUartData_t uart_data_unproccessed = {0}; 
 sCommandParameters_t * command_params = NULL;
-
 typedef struct sCommandParserTempString{ 
     char text[50]; 
     int  index;
 } sCommandParserTempString; 
 sCommandParserTempString TEMP; 
-
 const char command_module_names_lut[eCommandModulesLast][MODULE_MAX_NAME] = {
     [eCommandModulesModem]  = "MODEM",
     [eCommandModulesLED]    = "LED",
@@ -39,6 +39,16 @@ const char command_module_names_lut[eCommandModulesLast][MODULE_MAX_NAME] = {
     [eCommandModulesEEPROM] = "EEPROM"
 };
 
+const sCommandFunctions_t * command_function_all_modules[eCommandModulesLast] = {
+    [eCommandModulesModem]  = modem_command_function_lut,
+    [eCommandModulesLED]    = NULL,
+    [eCommandModulesPCUART] = NULL,
+    [eCommandModulesPower]  = NULL,
+    [eCommandModulesAcce]   = NULL,
+    [eCommandModulesEEPROM] = NULL
+};
+
+
 
 
 
@@ -46,6 +56,8 @@ const char command_module_names_lut[eCommandModulesLast][MODULE_MAX_NAME] = {
 bool CMD_API_CommandParser(sCommandParameters_t*  parse_command, sUartData_t * uart_data);
 void CMD_API_Thread (void *argument);
 eCommandModules_t CMD_API_ModuleParser(char * module_name);
+uint8_t CMD_API_InstructionParser(char * command_name, eCommandModules_t module);
+
 
 
 
@@ -84,71 +96,61 @@ void CMD_API_Thread (void *argument) {
 
 
 bool CMD_API_CommandParser(sCommandParameters_t*  parse_command, sUartData_t * uart_data) {
-    for (int i=0; i<uart_data->size; i++) {      
-        while (1){
-            if (uart_data->buffer_adress == NULL) return false;
-        	if (*(uart_data->buffer_adress+i) != '\n'){ //not end of message
-                while (1){
-                    //PARSEMODULE  
-                    TEMP.text[TEMP.index++] = *(uart_data->buffer_adress+i); 
-                    if ((TEMP.text[TEMP.index-1] == ':') || i == MODULE_MAX_NAME) break;
-                    else i++;
-                }
-                parse_command->module = CMD_API_ModuleParser(TEMP.text);
-                break;
-
-            }
-
+    uint8_t no_params = 0; 
+    //CHECK POINTER
+    if (uart_data->buffer_adress == NULL) return false;
+    
+    int i = 0;
+    //PARSEMODULE. GO THROUGH TEXT AND CHECK IF NO 0, NO \N AND NOT LONGER THAN MAX MODULE NAME
+    while (1){         
+        TEMP.text[TEMP.index] = *(uart_data->buffer_adress+i); 
+        if( 
+            (TEMP.text[TEMP.index] == 0) 
+            ||(TEMP.text[TEMP.index] == '\n')
+            ||(i==MODULE_MAX_NAME) 
+        ) return false; 
+        if (TEMP.text[TEMP.index] == ':') break; //MODULE PARSE TERMINATION CHARACTER
+        else { 
+            i++; 
+            TEMP.index++;
         }
-        break;
+    }
+    parse_command->module = CMD_API_ModuleParser(TEMP.text); //PARSE FROM TEXT. 
+    if (parse_command->module == eCommandModulesERROR) return false;  //NO MODULE
+    //CLEAN TEMP BUFFER
+    for ( ; TEMP.index > 0; TEMP.index--){
+        TEMP.text[TEMP.index] = 0; 
+    } 
+    i++;
+    //PARSE COMMAND NAME TO LOOK THROUGH TABLES
+    while (1){ 
+        TEMP.text[TEMP.index] = *(uart_data->buffer_adress+i); 
+        if(
+            (TEMP.text[TEMP.index] == 0) 
+            ||(TEMP.index == MODULE_MAX_NAME)
+        )   return false; 
+        if (TEMP.text[TEMP.index] == '\n'){
+            no_params = 1; 
+            break; //END OF COMMAND NAME AND NO PARAMS WILL BE USED 
+        } else if (TEMP.text[TEMP.index] == ':') //COMMAND PARSE TERMINATION COMMAND
+            break; 
+        else {
+            i++; 
+            TEMP.index++; 
+        } 
+    }
+    parse_command->command = CMD_API_InstructionParser(TEMP.text, parse_command->module);
+    //CLEAN TEMP BUFFER
+    for ( ; TEMP.index > 0; TEMP.index--){
+        TEMP.text[TEMP.index] = 0; 
+    } 
+        
+
+
     }
 
 
-    
-    
-    
-    // sCommandResponse_t command_response_struct = {0};
-    // command_response_struct.response_buffer = cli_app_message_buffer->response_buffer;
-    // bool found_command = false;
-    // uint8_t cmd = 0;
-    // if (cli_app_message_buffer == NULL) {
-    //     return false;
-    // }
-    // command_response_struct.message_command = strtok(cli_app_message_buffer->buffer_adress, ":,");
-    // if (command_response_struct.message_command == NULL) {
-    //     snprintf(cli_app_message_buffer->response_buffer, ERROR_BUFFER_SIZE, "Invalid command name: %s", cli_app_message_buffer->buffer_adress);
-    //     return false;
-    // }
-    // command_response_struct.command_length = strlen(command_response_struct.message_command) + 1;
-    // command_response_struct.message_args = command_response_struct.message_command + command_response_struct.command_length;
-    // command_response_struct.args_length = cli_app_message_buffer->buffer_size - command_response_struct.command_length;
-    // for (cmd = 0; cmd < cli_app_message_buffer->functions_lut_size; cmd++) {
-    //     if (command_response_struct.command_length != cli_app_message_buffer->functions_lut[cmd].name_length) {
-    //         continue;
-    //     }
-    //     if (String_Compare(cli_app_message_buffer->functions_lut[cmd].name, command_response_struct.message_command, command_response_struct.command_length) == true) {
-    //         found_command = true;
-    //         break;
-    //     }
-    // }
-    // if (found_command == true) {
-    //     if (cli_app_message_buffer->functions_lut[cmd].function_pointer == NULL) {
-    //         snprintf(cli_app_message_buffer->response_buffer, ERROR_BUFFER_SIZE,
-    //         "Function pointer = NULL (command: %s: %s)", cli_app_message_buffer->functions_lut[cmd].name, command_response_struct.message_args);
-    //         return false;
-    //     }
-    //     if (cli_app_message_buffer->functions_lut[cmd].function_pointer(&command_response_struct) == false) {
-    //         return false;
-    //     }
-    // } else {
-    //     snprintf(cli_app_message_buffer->response_buffer, ERROR_BUFFER_SIZE, "Command not found: %s : %s \n", command_response_struct.message_command, command_response_struct.message_args);
-    //     return false;
-    // }
-    return true;
-}
-
-
-
+//THIS FUNCTION PARSE MODULE ENUM 
 
 eCommandModules_t CMD_API_ModuleParser(char * module_name){ 
     char t[MODULE_MAX_NAME] = {0};
@@ -166,3 +168,32 @@ eCommandModules_t CMD_API_ModuleParser(char * module_name){
     }
     return eCommandModulesERROR;     
 }
+
+//THIS FUNCTION PARSES ACTUAL COMMAND FOR MODULE
+  
+uint8_t CMD_API_InstructionParser (char * command_name, eCommandModules_t module){ 
+    char t[MODULE_MAX_NAME] = {0};
+    uint8_t t_index = 0;  
+    const sCommandFunctions_t * functions_lut = command_function_all_modules[module];
+    uint8_t functions_lut_size = sizeof(*functions_lut)/sizeof(sCommandFunctions_t);  
+
+
+    for (int i=0; i<MODULE_MAX_NAME; i++) { 
+        if ((command_name[i] >= 'A') && (command_name[i]<='Z')){
+            t[t_index++] = command_name[i];  
+        } else if (command_name[i] == ':') break; 
+        else t[t_index] = 0; 
+    }
+    
+    for (uint8_t i = 0; i<functions_lut_size; i++) {
+        if (strncmp(t, functions_lut->name, MODULE_MAX_NAME) == 0) return i; //COMMAND FOUND IN LUT 
+    }
+
+    return 0xFF; //NO COMMAND
+
+
+
+
+
+} 
+
