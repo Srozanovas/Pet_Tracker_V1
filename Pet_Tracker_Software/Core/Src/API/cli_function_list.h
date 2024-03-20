@@ -8,7 +8,7 @@
 
 
 typedef struct sCommandFunctions_t {
-    char *name;
+    char name[30];
     bool (*function_pointer) (char * func_params);
 } sCommandFunctions_t;
 
@@ -29,7 +29,7 @@ typedef enum eModemCommands_t {
 
 extern const sCommandFunctions_t modem_command_function_lut[eModemCommandsLast];
 
-uint8_t Command_Functions_Get_Function_Number (eModemCommands_t module, char * command_name); 
+
 
 
 #endif /* __CMD_LIST__H__ */

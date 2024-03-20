@@ -179,10 +179,11 @@ bool UART_API_SendString (eUart_t uart, char *string, uint16_t size) {
     osMutexRelease(uart_buffer_lut[uart].mutex_id);
     return true;
 }
-
+osStatus_t stat;
 
 bool UART_API_GetMessage (sUartData_t *acquired_buffer, uint32_t wait_time) {
-    if (osMessageQueueGet(uart_data_queue_id, acquired_buffer, NULL, wait_time) != osOK) {
+	stat = osMessageQueueGet(uart_data_queue_id, acquired_buffer, NULL, wait_time);
+	if ( stat != osOK) {
         return false;
     }
     return true;
