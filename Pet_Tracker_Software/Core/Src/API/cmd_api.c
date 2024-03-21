@@ -4,33 +4,40 @@
 #include "uart_api.h"
 #include "string.h"
 
-#include "power_api.h"
-#include "cli_function_list.h"
 
+#include "cli_function_list.h"
+#include "power_api.h"
+
+//DEFINES 
 #define COMMAND_QUEUE_SIZE 10
 #define COMMANDS_QUEUE_PUT_TIMEOUT 100
 #define MODULE_MAX_NAME 20
-//RTOS VARIABLES 
+//-----RTOS VARIABLES-------------
+//cmd api thread 
 const osThreadAttr_t cmd_api_thread_atr = {
     .name = "cmd_api_thread",
     .stack_size = 1024,
     .priority = osPriorityHigh
 };
 osThreadId_t cmd_api_thread_id = NULL;
+//message queue for commands
 const osMessageQueueAttr_t commands_queue_atr = {.name = "commands_queue"};
 osMessageQId commands_queue_id;
 
 
 
 //DATA VARIABLES
-sUartData_t uart_data_unproccessed = {0}; 
-sCommandParameters_t * command_params = NULL;
+sUartData_t uart_data_unproccessed = {0}; //data from uart
+sCommandParameters_t * command_params = NULL;  //module, function number, params parsed from uart data
+
+
 typedef struct sCommandParserTempString{ 
     char text[50]; 
     int  index;
 } sCommandParserTempString; 
-sCommandParserTempString TEMP; 
-const char command_module_names_lut[eCommandModulesLast][MODULE_MAX_NAME] = {
+sCommandParserTempString TEMP; //temp string buffer when parsing data
+
+const char command_module_names_lut[eCommandModulesLast][MODULE_MAX_NAME] = { //module names and enums. when name is found enum is returned
     [eCommandModulesModem]  = "MODEM",
     [eCommandModulesLED]    = "LED",
     [eCommandModulesPCUART] = "PCUART",
@@ -40,23 +47,23 @@ const char command_module_names_lut[eCommandModulesLast][MODULE_MAX_NAME] = {
 };
 
 
-
-const sCommandFunctions_t * command_function_all_modules[eCommandModulesLast] = {
+/*all modules functions look up table. from enum we know which look up table to look function in, 
+then find function in lut, sizes are for loops, because pointer returns only first element*/
+const sCommandFunctions_t * command_function_all_modules[eCommandModulesLast] = { 
     [eCommandModulesModem]  = modem_command_function_lut,
-    [eCommandModulesLED]    = NULL,
-    [eCommandModulesPCUART] = NULL,
-    [eCommandModulesPower]  = NULL,
-    [eCommandModulesAcce]   = NULL,
-    [eCommandModulesEEPROM] = NULL
+    [eCommandModulesLED]    = led_command_function_lut,
+    [eCommandModulesPCUART] = pcuart_command_function_lut,
+    [eCommandModulesPower]  = power_command_function_lut,
+    [eCommandModulesAcce]   = acce_command_function_lut,
+    [eCommandModulesEEPROM] = eeprom_command_function_lut
 };
-
 const uint8_t command_function_all_modules_sizes[eCommandModulesLast] = {
 	[eCommandModulesModem]  = (uint8_t)(eModemCommandsLast),
-	[eCommandModulesLED]    = 0,
-	[eCommandModulesPCUART] = 0,
-	[eCommandModulesPower]  = 0,
-	[eCommandModulesAcce]   = 0,
-	[eCommandModulesEEPROM] = 0
+	[eCommandModulesLED]    = (uint8_t)(eLEDCommandsLast),
+	[eCommandModulesPCUART] = (uint8_t)(ePCUARTCommandsLast),
+	[eCommandModulesPower]  = (uint8_t)(ePowerCommandsLast),
+	[eCommandModulesAcce]   = (uint8_t)(eAcceCommandsLast),
+	[eCommandModulesEEPROM] = (uint8_t)(eEEPROMCommandsLast)
 
 };
 
@@ -64,7 +71,7 @@ const uint8_t command_function_all_modules_sizes[eCommandModulesLast] = {
 
 
 
-//FUCTIONS 
+//FUCTIONS DECLARATION
 bool CMD_API_CommandParser(sCommandParameters_t*  parse_command, sUartData_t * uart_data);
 void CMD_API_Thread (void *argument);
 eCommandModules_t CMD_API_ModuleParser(char * module_name);
@@ -73,7 +80,7 @@ uint8_t CMD_API_InstructionParser(char * command_name, eCommandModules_t module)
 
 
 
-//CMD THREAD INIT 
+//CMD API THREAD INI. init thread and commands queue
 bool CMD_API_ThreadInit(void) {
     if  (commands_queue_id == NULL) {
         commands_queue_id = osMessageQueueNew(COMMAND_QUEUE_SIZE, sizeof(sCommandParameters_t), &commands_queue_atr);
@@ -90,8 +97,8 @@ bool CMD_API_ThreadInit(void) {
 }
 
 
-/*CMD THREAD. THIS FUNCTION WAITS INCOMING UART DATA, THEN CALLS CUT FUNCTION TO PARSE COMMAND STRUCTURE AND PUTS
-  IT INTO COMMANDS QUEUE*/
+/*CMD API THREAD.this function waits incoming uart data, then calls function to pare command structure and
+puts it into commands queue*/
 void CMD_API_Thread (void *argument) {
     while(1){ 
         if (UART_API_GetMessage(&uart_data_unproccessed, osWaitForever) == true) {
@@ -111,7 +118,7 @@ void CMD_API_Thread (void *argument) {
 
 bool CMD_API_CommandParser(sCommandParameters_t*  parse_command, sUartData_t * uart_data) {
     uint8_t no_params = 0; 
-    //CHECK POINTER
+    //check pointer if not null and delete TEMP buffer after last time parsing
     if (uart_data->buffer_adress == NULL) return false;
     for ( ; TEMP.index > 0; TEMP.index--){
             TEMP.text[TEMP.index] = 0;
@@ -176,10 +183,12 @@ bool CMD_API_CommandParser(sCommandParameters_t*  parse_command, sUartData_t * u
             }
         }
     }
-    return true;
+    return true; //should always end here 
 }
 
-//THIS FUNCTION PARSE MODULE ENUM 
+/*THIS FUNCTION PARSE MODULE ENUM. first buffer is fixed so no spaces, special characters etc will be between letters. also 
+lower case letters turned into upper case all of theese should work:
+MODEM, moDE m, modem, m O d E m etc.  */ 
 
 eCommandModules_t CMD_API_ModuleParser(char * module_name){ 
     char t[MODULE_MAX_NAME] = {0};
@@ -199,7 +208,9 @@ eCommandModules_t CMD_API_ModuleParser(char * module_name){
     return eCommandModulesERROR;     
 }
 
-//THIS FUNCTION PARSES ACTUAL COMMAND FOR MODULE
+/*THIS FUNCTION PARSES ACTUAL COMMAND FOR MODULE first buffer is fixed so no spaces, special characters etc will be between letters. also 
+lower case letters turned into upper case all of theese should work:
+POWER, poWE R, power, power: , GNSSENABLE GNSS Enable GNSS_ENABle etc.  */ 
   
 uint8_t CMD_API_InstructionParser (char * command_name, eCommandModules_t module){ 
     char t[MODULE_MAX_NAME] = {0};
@@ -209,7 +220,11 @@ uint8_t CMD_API_InstructionParser (char * command_name, eCommandModules_t module
 
 
     for (int i=0; i<MODULE_MAX_NAME; i++) { 
-        if (((command_name[i] >= 'A') && (command_name[i]<='Z')) || ((command_name[i] >= 'a') && (command_name[i]<='z'))){
+        if(
+            ((command_name[i] >= 'A') && (command_name[i]<='Z')) 
+            ||((command_name[i] >= 'a') && (command_name[i]<='z'))
+            ||((command_name[i] >= '0') && (command_name[i]<='9'))
+        ){
             if ((command_name[i] >= 'a') && (command_name[i]<='z')) command_name[i]-=32; //convert to UPPER CASE 
             t[t_index++] = command_name[i];  
         } else if (command_name[i] == ':') break; 

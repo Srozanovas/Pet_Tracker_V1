@@ -1,16 +1,12 @@
-/**********************************************************************************************************************
- * Includes
- *********************************************************************************************************************/
-
-//#include "debug_api.h"
 #include "uart_driver.h"
 #include "uart_api.h"
 #include "cmd_api.h"
-//#include "accelerometer_api.h"
 
 
-#define UART_QUEUE_PUT_TIMEOUT 100
+#define UART_QUEUE_PUT_TIMEOUT 100 
 #define UART_QUEUE_SIZE 20
+
+//os flags
 #define DEBUG_UART_GOT_MESSAGE 0x01
 #define MODEM_UART_GOT_MESSAGE 0x02
 #define DEBUG_UART_MESSAGE_PUT_IN_QUEUE 0x04
@@ -21,18 +17,28 @@
 
 
 uint8_t uart_flag = 0;
-//RTOS VARIABLES 
+//RTOS VARIABLES
+//uart api thread  
 const osThreadAttr_t uart_api_thread_atr = {
     .name = "uart_api_thread",
     .stack_size = 1024,
     .priority = osPriorityHigh
 };
+osThreadId_t uart_thread_id = NULL;
+
+//uart data queue
 const osMessageQueueAttr_t uart_data_queue_atr= {.name = "uart_data_queue"};
 osMessageQId uart_data_queue_id;
+
+//uart mutexes
 const osMutexAttr_t debug_send_string_mutex_atr    = {.name = "debug_send_string_mutex"};
 const osMutexAttr_t modem_send_string_mutex_atr    = {.name = "modem_send_string_mutex"};
+
+//uart flags
 osEventFlagsId_t uart_flags = NULL;
-osThreadId_t uart_thread_id = NULL;
+
+
+//not parsed raw uart data
 sUartData_t uart_data = {0};
 
 

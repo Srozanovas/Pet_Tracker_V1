@@ -7,34 +7,31 @@
 
 
 #include "modem_api.h"
+#include "power_api.h"
 
 const sCommandFunctions_t modem_command_function_lut[eModemCommandsLast] = {
 	[eModemCommandsPower] 		= {.name = "POWER",			.function_pointer = &Modem_API_Power},
 	[eModemCommandsGNSSPower]	= {.name = "GNSSPOWER", 	.function_pointer = &Modem_API_GNSS_Power},
 };
+const sCommandFunctions_t led_command_function_lut[eLEDCommandsLast]={
+	[eLEDCommandsFirst]	= {.name = "A", .function_pointer = NULL}
+};
+const sCommandFunctions_t pcuart_command_function_lut[ePCUARTCommandsLast]={
+	[ePCUARTCommandsFirst]	= {.name = "A", .function_pointer = NULL}
+};
+const sCommandFunctions_t power_command_function_lut[ePowerCommandsLast]={
+	[ePowerCommandsFirst]	= {.name = "4VPOWER", .function_pointer =&POWER_API_4VPower},
+	[ePowerCommandsFirst]	= {.name = "GNSSPOWER", .function_pointer =&POWER_API_GNSSPower},
+	[ePowerCommandsFirst]	= {.name = "LEDPOWER", .function_pointer =&POWER_API_LEDPower},
+	[ePowerCommandsFirst]	= {.name = "GSMPOWER", .function_pointer =&POWER_API_ModemPower}
+};
+const sCommandFunctions_t acce_command_function_lut[eAcceCommandsLast]={
+	[eAcceCommandsFirst]	= {.name = "A", .function_pointer = NULL}												
+};
+const sCommandFunctions_t eeprom_command_function_lut[eEEPROMCommandsLast]={
+	[eEEPROMCommandsFirst]	= {.name = "A", .function_pointer = NULL}	
+};
 
-
-
-
-/**********************************************************************************************************************
- * Private variables
- *********************************************************************************************************************/
-
-/**********************************************************************************************************************
- * Exported variables and references
- *********************************************************************************************************************/
-
-/**********************************************************************************************************************
- * Prototypes of private functions
- *********************************************************************************************************************/
-
-/**********************************************************************************************************************
- * Definitions of private functions
- *********************************************************************************************************************/
-
-/**********************************************************************************************************************
- * Definitions of exported functions
- *********************************************************************************************************************/
 
 
 
