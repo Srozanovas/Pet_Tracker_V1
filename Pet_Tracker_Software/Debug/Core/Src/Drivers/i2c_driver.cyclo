@@ -1,0 +1,8 @@
+../Core/Src/Drivers/i2c_driver.c:71:6:I2C_Driver_Init	6
+../Core/Src/Drivers/i2c_driver.c:98:6:I2C_Low_Level_Init	7
+../Core/Src/Drivers/i2c_driver.c:132:6:I2C_Driver_Send	1
+../Core/Src/Drivers/i2c_driver.c:136:6:I2C_Driver_Read	1
+../Core/Src/Drivers/i2c_driver.c:143:6:HAL_I2C_MemTxCpltCallback	1
+../Core/Src/Drivers/i2c_driver.c:147:6:HAL_I2C_MemRxCpltCallback	1
+../Core/Src/Drivers/i2c_driver.c:152:6:I2C1_EV_IRQHandler	1
+../Core/Src/Drivers/i2c_driver.c:157:6:I2C2_EV_IRQHandler	1
