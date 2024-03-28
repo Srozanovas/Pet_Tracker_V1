@@ -18,7 +18,7 @@ typedef struct sCommandFunctions_t {
 //all modem functions 
 typedef enum eModemCommands_t { 
     eModemCommandsFirst = 0, 
-    eModemCommandsPower = eModemCommandsFirst, 
+    eModemCommandsSendCommand = eModemCommandsFirst, 
     eModemCommandsGNSSPower, 
     eModemCommandsLast
 } eModemCommands_t;

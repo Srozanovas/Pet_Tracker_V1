@@ -55,8 +55,6 @@
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
-extern I2C_HandleTypeDef hi2c1;
-extern I2C_HandleTypeDef hi2c2;
 extern TIM_HandleTypeDef htim1;
 
 /* USER CODE BEGIN EV */
@@ -165,6 +163,7 @@ void DebugMon_Handler(void)
   * @brief This function handles EXTI line1 interrupt.
   */
 
+
 /**
   * @brief This function handles TIM1 update interrupt and TIM16 global interrupt.
   */
@@ -185,9 +184,17 @@ void TIM1_UP_TIM16_IRQHandler(void)
 
 
 /**
+  * @brief This function handles I2C2 event interrupt.
+  */
+
+
+/**
   * @brief This function handles USART1 global interrupt.
   */
 
+/**
+  * @brief This function handles USART2 global interrupt.
+  */
 
 /* USER CODE BEGIN 1 */
 

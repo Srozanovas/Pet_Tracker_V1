@@ -87,9 +87,11 @@ bool UART_API_Init (eUart_t uart_id, eBaudRate_t baudrate) {
 
 
     //CREATE MUTEX'ES FOR THREADS TO USE 
-    uart_buffer_lut[uart_id].mutex_id = osMutexNew(uart_buffer_lut[uart_id].mutex_atr);
-    if (uart_buffer_lut[uart_id].mutex_id == NULL) {
-    	return false;
+    if (uart_buffer_lut[uart_id].mutex_id == NULL){
+		uart_buffer_lut[uart_id].mutex_id = osMutexNew(uart_buffer_lut[uart_id].mutex_atr);
+		if (uart_buffer_lut[uart_id].mutex_id == NULL) {
+			return false;
+		}
     }
 
     //CREATE MESSAGE QUEES TO PUT MESSAGES FOR CMD API 
@@ -155,8 +157,12 @@ void UART_API_Thread (void *argument) {
                 case eUartStateSend:
                     uart_data.buffer_adress = (char*)uart_buffer_lut[uart].buffer;
                     uart_data.size = uart_buffer_lut[uart].index;
-                    if (osMessageQueuePut(uart_data_queue_id, &uart_data, osPriorityHigh, UART_QUEUE_PUT_TIMEOUT) != osOK) {
+                    if (uart == eUartModem){
+                    	UART_API_SendString(eUartDebug, uart_data.buffer_adress, uart_data.size);
+                    } else {
+						if (osMessageQueuePut(uart_data_queue_id, &uart_data, osPriorityHigh, UART_QUEUE_PUT_TIMEOUT) != osOK) {
 
+						}
                     }
                     uart_buffer_lut[uart].state = eUartStateInit;
                     break;
@@ -178,7 +184,7 @@ bool UART_API_SendString (eUart_t uart, char *string, uint16_t size) {
     if (osMutexAcquire(uart_buffer_lut[uart].mutex_id, osWaitForever) != osOK) {
         return false;
     }
-    if (UART_Driver_Send_String((uint8_t*) string, size, uart) != true) {
+    if (UART_Driver_Send_String( uart, (uint8_t*) string, size) != true) {
         osMutexRelease(uart_buffer_lut[uart].mutex_id);
         return false;
     }

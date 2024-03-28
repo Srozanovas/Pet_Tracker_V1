@@ -28,7 +28,6 @@ osMessageQId commands_queue_id;
 
 //DATA VARIABLES
 sUartData_t uart_data_unproccessed = {0}; //data from uart
-sCommandParameters_t * command_params = NULL;  //module, function number, params parsed from uart data
 
 
 typedef struct sCommandParserTempString{ 
@@ -83,7 +82,7 @@ uint8_t CMD_API_InstructionParser(char * command_name, eCommandModules_t module)
 //CMD API THREAD INI. init thread and commands queue
 bool CMD_API_ThreadInit(void) {
     if  (commands_queue_id == NULL) {
-        commands_queue_id = osMessageQueueNew(COMMAND_QUEUE_SIZE, sizeof(sCommandParameters_t), &commands_queue_atr);
+        commands_queue_id = osMessageQueueNew(COMMAND_QUEUE_SIZE, sizeof(sCommandParameters_t *), &commands_queue_atr);
         if (commands_queue_id == NULL) {
         	return false;
         } 
@@ -102,7 +101,8 @@ puts it into commands queue*/
 void CMD_API_Thread (void *argument) {
     while(1){ 
         if (UART_API_GetMessage(&uart_data_unproccessed, osWaitForever) == true) {
-			command_params = calloc(1, sizeof(sCommandParameters_t));
+        	sCommandParameters_t *command_params = NULL;  //module, function number, params parsed from uart data
+        	command_params = calloc(1, sizeof(sCommandParameters_t));
 			command_params -> params = calloc(50, sizeof(char));
 			CMD_API_CommandParser(command_params, &uart_data_unproccessed);
 			osMessageQueuePut(commands_queue_id, &command_params, osPriorityHigh, COMMANDS_QUEUE_PUT_TIMEOUT);
@@ -227,19 +227,24 @@ uint8_t CMD_API_InstructionParser (char * command_name, eCommandModules_t module
         ){
             if ((command_name[i] >= 'a') && (command_name[i]<='z')) command_name[i]-=32; //convert to UPPER CASE 
             t[t_index++] = command_name[i];  
-        } else if (command_name[i] == ':') break; 
+        } else if (command_name[i] == ':'){\
+        	command_name[i] = 0;
+        	break;
+        }
         else t[t_index] = 0; 
     }
     
     for (uint8_t i = 0; i<functions_lut_size; i++) {
         if (strncmp(t, (functions_lut+i)->name, MODULE_MAX_NAME) == 0) return i; //COMMAND FOUND IN LUT
     }
-
     return 0xFF; //NO COMMAND
-
-
-
-
-
 } 
 
+
+bool CMD_API_GetFromQueue (sCommandParameters_t **command, uint32_t wait_time) {
+	osStatus_t stat = osMessageQueueGet(commands_queue_id, command, NULL, wait_time);
+	if ( stat != osOK) {
+        return false;
+   }
+    return true;
+}

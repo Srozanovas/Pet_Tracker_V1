@@ -9,6 +9,7 @@
 
 /*____________________________________________DEFINES, CONSTANTS, LUT's, VARIABLES, etc______________________________________________*/
 #define RING_BUFFER_SIZE 150
+#define UART_TX_MAX 300
 
 
 typedef struct sUartDesc_t {
@@ -164,18 +165,20 @@ bool UART_Driver_Low_Level_Init(eUart_t uart)
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){ //SAVE 1 BYTE OF DATA TO RING BUFFER
     if((*huart).Instance==uart_desc_lut_dynamic[eUartDebug].uart_handle.Instance){
-        RingBuffer_Put(uart_desc_lut_dynamic[eUartDebug].rb_handle, uart_desc_lut_dynamic[eUartDebug].rx_data[0]);
+    	if (uart_desc_lut_dynamic[eUartDebug].rx_data[0]!=0)
+    		RingBuffer_Put(uart_desc_lut_dynamic[eUartDebug].rb_handle, uart_desc_lut_dynamic[eUartDebug].rx_data[0]);
         if (uart_desc_lut_dynamic[eUartDebug].rx_data[0] == (uint8_t)('\n')) {
             uart_desc_lut_dynamic[eUartDebug].uart_set_flag(eUartDebug);
         }
         HAL_UART_Receive_IT(&uart_desc_lut_dynamic[eUartDebug].uart_handle, uart_desc_lut_dynamic[eUartDebug].rx_data, 1);
     } 
     if((*huart).Instance==uart_desc_lut_dynamic[eUartModem].uart_handle.Instance){
-        RingBuffer_Put(uart_desc_lut_dynamic[eUartModem].rb_handle, uart_desc_lut_dynamic[eUartDebug].rx_data[0]);
+    	if (uart_desc_lut_dynamic[eUartModem].rx_data[0]!=0)
+    		RingBuffer_Put(uart_desc_lut_dynamic[eUartModem].rb_handle, uart_desc_lut_dynamic[eUartModem].rx_data[0]);
         if (uart_desc_lut_dynamic[eUartModem].rx_data[0] == (uint8_t)('\n')) {
             uart_desc_lut_dynamic[eUartModem].uart_set_flag(eUartModem);
         }
-        HAL_UART_Receive_IT(&uart_desc_lut_dynamic[eUartModem].uart_handle, uart_desc_lut_dynamic[eUartDebug].rx_data, 1);
+        HAL_UART_Receive_IT(&uart_desc_lut_dynamic[eUartModem].uart_handle, uart_desc_lut_dynamic[eUartModem].rx_data, 1);
     } 
  }
 
@@ -191,8 +194,12 @@ bool UART_Driver_GetByte (eUart_t uart, uint8_t *byte) {    //GET 1 BYTE OF DATA
 
 
 
-bool UART_Driver_Send_String () {   //SEND MESSAGE THROUGH UART
-    //HAL_UART_Transmit_IT(&uart_desc_lut_dynamic[eUartDebug].uart_handle, "Labas\n", sizeof("Labas\n"));
+bool UART_Driver_Send_String (eUart_t uart, uint8_t *uart_tx, uint16_t size) {   //SEND MESSAGE THROUGH UART
+    uint8_t tx_size;
+    for (tx_size=0; (tx_size<UART_TX_MAX) && (tx_size < size); tx_size ++){
+    	if (*(uart_tx+tx_size) == 0) break;
+    }
+	HAL_UART_Transmit_IT(&uart_desc_lut_dynamic[uart].uart_handle, uart_tx, tx_size);
     return true;
 }
 

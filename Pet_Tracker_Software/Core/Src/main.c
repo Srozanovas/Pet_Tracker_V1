@@ -1,4 +1,3 @@
-
 #include "main.h"
 #include "cmsis_os.h"
 
@@ -8,7 +7,7 @@
 #include "ring_bufer.h"
 #include "i2c_driver.h"
 #include "uart_api.h"
-
+#include "cli_app.h"
 
 
 osThreadId_t defaultTaskHandle;
@@ -34,13 +33,17 @@ int main(void)
 {
   HAL_Init();
   SystemClock_Config();
-  if (UART_API_Init(eUartDebug, eBaudRate9600)) pt_status |= DEBUG_UART_ENABLED;
+  osKernelInitialize();
+  CLI_APP_Init();
+  if (UART_API_Init(eUartDebug, eBaudRate19200)) pt_status |= DEBUG_UART_ENABLED;
   else (pt_status &= ~DEBUG_UART_ENABLED);
   if (UART_API_Init(eUartModem, eBaudRate9600)) pt_status |= MODEM_UART_ENABLED;
   else (pt_status &= ~MODEM_UART_ENABLED);
   GPIO_Driver_Init(eGpioPinA12LEDsOn, ePinLow);
+  GPIO_Driver_Init(eGpioPinA6GSMPower, ePinHigh);
+  GPIO_Driver_Init(eGpioPinB0Power4V, ePinHigh);
 
-  osKernelInitialize();
+
   defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
   osKernelStart();
   

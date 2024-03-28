@@ -38,7 +38,7 @@ bool UART_Driver_Init (eUart_t uart, eBaudRate_t baudrate, bool(*function_pointe
 bool UART_Driver_Low_Level_Init(eUart_t); 
 // bool UART_Driver_TansmitByte (eUart_t uart, uint8_t symbol);
 // bool UART_Driver_EnableInterupt (eUart_t uart);
-bool UART_Driver_Send_String (); //
+bool UART_Driver_Send_String (eUart_t uart, uint8_t *uart_tx, uint16_t size);
 bool UART_Driver_GetByte(eUart_t uart, uint8_t *byte);
 // bool Modem_API_SendSms (char *buffer, uint16_t size);
 #endif /* __UART_DRIVER__H__ */
