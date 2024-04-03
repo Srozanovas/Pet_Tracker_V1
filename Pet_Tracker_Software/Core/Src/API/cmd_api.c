@@ -231,7 +231,7 @@ uint8_t CMD_API_InstructionParser (char * command_name, eCommandModules_t module
         	command_name[i] = 0;
         	break;
         }
-        else t[t_index] = 0; 
+        else t[t_index] = 0;
     }
     
     for (uint8_t i = 0; i<functions_lut_size; i++) {

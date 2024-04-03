@@ -159,7 +159,7 @@ void UART_API_Thread (void *argument) {
                     uart_data.size = uart_buffer_lut[uart].index;
                     if (uart == eUartModem){
                     	UART_API_SendString(eUartDebug, uart_data.buffer_adress, uart_data.size);
-                    } else {
+                    	free(uart_data.buffer_adress);
 						if (osMessageQueuePut(uart_data_queue_id, &uart_data, osPriorityHigh, UART_QUEUE_PUT_TIMEOUT) != osOK) {
 
 						}
