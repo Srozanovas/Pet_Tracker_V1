@@ -85,8 +85,6 @@ target_sources(
     "Core\\Src\\API\\cli_function_list.c"
     "Core\\Src\\API\\cmd_api.c"
     "Core\\Src\\API\\eeprom_api.c"
-    "Core\\Src\\API\\modem_api.c"
-    "Core\\Src\\API\\power_api.c"
     "Core\\Src\\API\\uart_api.c"
     "Core\\Src\\APP\\cli_app.c"
     "Core\\Src\\Drivers\\gpio_driver.c"
