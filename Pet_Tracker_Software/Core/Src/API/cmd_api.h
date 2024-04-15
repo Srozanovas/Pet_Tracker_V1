@@ -16,6 +16,7 @@ typedef enum eCommandModules_t {
     eCommandModulesPower, 
     eCommandModulesAcce, 
     eCommandModulesEEPROM,
+    eCommandModulesMisc,
     eCommandModulesLast,
     eCommandModulesERROR
 } eCommandModules_t;
@@ -33,9 +34,7 @@ typedef struct sCommandParameters_t {
 
 bool CMD_API_ThreadInit (void);
 bool CMD_API_GetFromQueue (sCommandParameters_t **command, uint32_t wait_time);
-
-
-
+bool CMD_API_AddCommandToQueue(sCommandParameters_t *comand);
 
 
 #endif /* __CMD_APP__H__ */

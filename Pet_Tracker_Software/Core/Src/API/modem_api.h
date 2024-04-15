@@ -5,9 +5,14 @@
 #include "stdbool.h"
 
 
+
+
+
+
+
 bool Modem_API_SendCommand(char * params); 
 bool Modem_API_GNSS_Power(char *params);
-
+bool Modem_API_Init(); 
 
 
 

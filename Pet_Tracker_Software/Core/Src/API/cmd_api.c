@@ -9,9 +9,8 @@
 #include "power_api.h"
 
 //DEFINES 
-#define COMMAND_QUEUE_SIZE 10
-#define COMMANDS_QUEUE_PUT_TIMEOUT 100
-#define MODULE_MAX_NAME 20
+
+
 //-----RTOS VARIABLES-------------
 //cmd api thread 
 const osThreadAttr_t cmd_api_thread_atr = {
@@ -42,7 +41,8 @@ const char command_module_names_lut[eCommandModulesLast][MODULE_MAX_NAME] = { //
     [eCommandModulesPCUART] = "PCUART",
     [eCommandModulesPower]  = "POWER",
     [eCommandModulesAcce]   = "ACCE",
-    [eCommandModulesEEPROM] = "EEPROM"
+    [eCommandModulesEEPROM] = "EEPROM",
+    [eCommandModulesMisc]   = "MISC"
 };
 
 
@@ -54,7 +54,8 @@ const sCommandFunctions_t * command_function_all_modules[eCommandModulesLast] = 
     [eCommandModulesPCUART] = pcuart_command_function_lut,
     [eCommandModulesPower]  = power_command_function_lut,
     [eCommandModulesAcce]   = acce_command_function_lut,
-    [eCommandModulesEEPROM] = eeprom_command_function_lut
+    [eCommandModulesEEPROM] = eeprom_command_function_lut,
+    [eCommandModulesMisc]   = misc_command_function_lut
 };
 const uint8_t command_function_all_modules_sizes[eCommandModulesLast] = {
 	[eCommandModulesModem]  = (uint8_t)(eModemCommandsLast),
@@ -62,8 +63,8 @@ const uint8_t command_function_all_modules_sizes[eCommandModulesLast] = {
 	[eCommandModulesPCUART] = (uint8_t)(ePCUARTCommandsLast),
 	[eCommandModulesPower]  = (uint8_t)(ePowerCommandsLast),
 	[eCommandModulesAcce]   = (uint8_t)(eAcceCommandsLast),
-	[eCommandModulesEEPROM] = (uint8_t)(eEEPROMCommandsLast)
-
+	[eCommandModulesEEPROM] = (uint8_t)(eEEPROMCommandsLast),
+    [eCommandModulesMisc]   = (uint8_t)(eMiscCommandsLast)
 };
 
 
@@ -112,7 +113,10 @@ void CMD_API_Thread (void *argument) {
     osThreadTerminate(cmd_api_thread_id);
 }
 
-
+bool CMD_API_AddCommandToQueue(sCommandParameters_t *comand){ 
+    osMessageQueuePut(commands_queue_id, &comand, osPriorityHigh, COMMANDS_QUEUE_PUT_TIMEOUT);
+    return true;
+}
 
 //THIS FUNCTION PARSES COMMANDS, MODULES, AND FUNCTIONS NUMBER FROM RAW UART DATA
 

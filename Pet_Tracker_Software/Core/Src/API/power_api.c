@@ -2,9 +2,6 @@
 #include "gpio_driver.h"
 #include "cmsis_os2.h"
 
-
-uint16_t power_stats; 
-
 uint8_t POWER_API_ParseLevel(char* params) { 
     uint8_t power = 2;  
     for (int i = 0; i<50; i++){ 
@@ -28,13 +25,10 @@ bool POWER_API_PinControl(eGpioPin_t gpio_pin, uint8_t power){
     switch (gpio_pin) {
         case eGpioPinA12LEDsOn: {
             if (power == 0){ //turn off                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              if (power == 0) { //turn off
-                if(GPIO_Driver_WritePin(gpio_pin, ePinHigh) == true)
-                    power_stats &= ~LED_ON;  
+                if(GPIO_Driver_WritePin(gpio_pin, ePinHigh) != true) return false; 
                 
             } else if (power == 1){ //turn on 
-                if (GPIO_Driver_WritePin(gpio_pin, ePinLow) == true) { 
-                    power_stats |= LED_ON;
-                }
+                if (GPIO_Driver_WritePin(gpio_pin, ePinLow) != true)  return false;
             }else{   // undefined 
                 return false;
             }
@@ -42,13 +36,10 @@ bool POWER_API_PinControl(eGpioPin_t gpio_pin, uint8_t power){
         }
         case eGpioPinB0Power4V: {
             if (power == 0) { //turn off
-                if (GPIO_Driver_WritePin(gpio_pin, ePinLow) == true){
-                    power_stats &= ~V4_ON;  
-                }
+                if (GPIO_Driver_WritePin(gpio_pin, ePinLow) != true) return false; 
             } else if (power == 1){ //turn on 
-                if (GPIO_Driver_WritePin(gpio_pin, ePinHigh) == true){
-                    power_stats |= V4_ON;
-                }
+                if (GPIO_Driver_WritePin(gpio_pin, ePinHigh) != true) return false; 
+                
             } else { // undefined 
                 return false;
             }
@@ -67,20 +58,55 @@ bool POWER_API_LEDPower(char* params){
 }
 
 bool POWER_API_4VPower(char* params){
+	uint8_t power = POWER_API_ParseLevel(params);
+	if ((gpio_init_status & (1<<eGpioPinB0Power4V)) == 0){ //if not initialized
+        GPIO_Driver_Init(eGpioPinB0Power4V, ePinLow);
+        if ((gpio_init_status & (1<<eGpioPinB0Power4V)) == 0) return false; //didn't initialize 
+    }
     return POWER_API_PinControl(eGpioPinB0Power4V, POWER_API_ParseLevel(params));
 } 
 bool POWER_API_GNSSPower(char *params){
     return true;
 } 
+
+
 bool POWER_API_ModemPower(char *params){
     uint8_t power = POWER_API_ParseLevel(params);
-    if(power == 1 ){ 
-        if ((power_stats & V4_ON) == 0){  //4V power not on 
-            if (POWER_API_PinControl(eGpioPinB0Power4V, 1) == false) return false;
+    if(power == 1){ 
+
+        //CHECK IF NECESSERY PINS ARE INITIALIZED AND ON: 
+        if ((gpio_pin_level_status & (1<<eGpioPinB0Power4V)) == 0) { 
+            if ((gpio_init_status & (1<<eGpioPinB0Power4V)) == 0) { 
+                GPIO_Driver_Init(eGpioPinB0Power4V, ePinHigh); 
+                if ((gpio_init_status & (1<<eGpioPinB0Power4V)) == 0) return false;
+                if ((gpio_pin_level_status & (1<<eGpioPinB0Power4V)) == 0) return false;
+           } else {
+                GPIO_Driver_WritePin(eGpioPinB0Power4V, ePinHigh); 
+                if ((gpio_pin_level_status & (1<<eGpioPinB0Power4V)) == 0) return false;
+           }
         }
+        if ((gpio_pin_level_status & (1<<eGpioPinA6GSMPower)) == 0){ 
+            if ((gpio_init_status & (1<<eGpioPinA6GSMPower)) == 0) { 
+                GPIO_Driver_Init(eGpioPinA6GSMPower, ePinHigh); 
+                if ((gpio_init_status & (1<<eGpioPinA6GSMPower)) == 0) return false;
+                if ((gpio_pin_level_status & (1<<eGpioPinA6GSMPower)) == 0) return false;
+            } else {
+                GPIO_Driver_ReadPin(eGpioPinA6GSMPower, ePinHigh); 
+                if ((gpio_pin_level_status & (1<<eGpioPinA6GSMPower)) == 0) return false;
+            }
+        }
+
+        //TURNING ON MODEM: 
         if (GPIO_Driver_WritePin(eGpioPinA6GSMPower, ePinLow) == false) return false; 
-        osDelay(2000); 
+        osDelay(1000); 
         if (GPIO_Driver_WritePin(eGpioPinA6GSMPower, ePinHigh) == false) return false; 
+        
+    } else {  
+        if ((gpio_pin_level_status & (1<<eGpioPinA6GSMPower)) != 0) { 
+            if (GPIO_Driver_WritePin(eGpioPinA6GSMPower, ePinLow) == false) return false; 
+            osDelay(1000); 
+            if (GPIO_Driver_WritePin(eGpioPinA6GSMPower, ePinHigh) == false) return false; 
+        }
     }
     return true;
 }

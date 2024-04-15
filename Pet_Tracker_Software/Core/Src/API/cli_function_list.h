@@ -62,6 +62,14 @@ typedef enum eEEPROMCommands_t {
 } eEEPROMCommands_t;
 
 
+typedef enum eMiscCommands_t{ 
+    eMiscCommandsFirst = 0, 
+    eMiscCommandsWritePin = eMiscCommandsFirst, 
+    eMiscCommandsTogglePin, 
+    eMiscCommandsInitPin, 
+    eMiscCommandsLast
+}eMiscCommands_t;
+
 
 
 extern const sCommandFunctions_t modem_command_function_lut[eModemCommandsLast];
@@ -70,7 +78,7 @@ extern const sCommandFunctions_t pcuart_command_function_lut[ePCUARTCommandsLast
 extern const sCommandFunctions_t power_command_function_lut[ePowerCommandsLast];
 extern const sCommandFunctions_t acce_command_function_lut[eAcceCommandsLast];
 extern const sCommandFunctions_t eeprom_command_function_lut[eEEPROMCommandsLast];
-
+extern const sCommandFunctions_t misc_command_function_lut[eMiscCommandsLast];
 
 
 #endif /* __CMD_LIST__H__ */

@@ -2,6 +2,7 @@
 /*_______________________________________________INCLUDES____________________________________________________*/
 #include "uart_driver.h"
 #include "../utility/ring_bufer.h"
+#include "main.h"
 /*_______________________________________________INCLUDES____________________________________________________*/
 
 
@@ -84,6 +85,16 @@ const static uint32_t uart_baudrate_lut[] = {
     [eBaudRate115200] = 115200,
 };
 
+
+#ifdef DEBUGO_KODAS
+    uint8_t tx_pc[50]; 
+    uint8_t tx_pc_index = 0; 
+    uint8_t tx_modem[50]; 
+    uint8_t tx_modem_index = 0; 
+#endif
+
+
+
 /*____________________________________________CONSTANTS, LUT's, VARIABLES, etc______________________________________________*/
 
 
@@ -143,7 +154,7 @@ bool UART_Driver_Low_Level_Init(eUart_t uart)
             Error_Handler();
         }
         __HAL_RCC_USART1_CLK_ENABLE();
-        HAL_NVIC_SetPriority(USART1_IRQn, 5, 0);
+        HAL_NVIC_SetPriority(USART1_IRQn, 30, 1);
         HAL_NVIC_EnableIRQ(USART1_IRQn);
         return true; 
     }
@@ -155,7 +166,7 @@ bool UART_Driver_Low_Level_Init(eUart_t uart)
             Error_Handler();
         }
         __HAL_RCC_USART2_CLK_ENABLE();
-        HAL_NVIC_SetPriority(USART2_IRQn, 5, 0);
+        HAL_NVIC_SetPriority(USART2_IRQn, 30, 1);
         HAL_NVIC_EnableIRQ(USART2_IRQn);
         return true; 
     }
@@ -163,22 +174,48 @@ bool UART_Driver_Low_Level_Init(eUart_t uart)
 }
 
 
+
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){ //SAVE 1 BYTE OF DATA TO RING BUFFER
     if((*huart).Instance==uart_desc_lut_dynamic[eUartDebug].uart_handle.Instance){
-    	if (uart_desc_lut_dynamic[eUartDebug].rx_data[0]!=0)
+    	#ifdef DEBUGO_KODAS
+        tx_modem[tx_modem_index] = uart_desc_lut_dynamic[eUartDebug].rx_data[0]; 
+        if (tx_modem[tx_modem_index]=='\n') {
+            UART_Driver_Send_String(eUartModem, tx_modem, tx_modem_index); 
+            tx_modem_index = 0 ;
+        } else { 
+            tx_modem_index++; 
+        }
+        HAL_UART_Receive_IT(&uart_desc_lut_dynamic[eUartDebug].uart_handle, uart_desc_lut_dynamic[eUartDebug].rx_data, 1);
+
+        #else 
+        if (uart_desc_lut_dynamic[eUartDebug].rx_data[0]!=0)
     		RingBuffer_Put(uart_desc_lut_dynamic[eUartDebug].rb_handle, uart_desc_lut_dynamic[eUartDebug].rx_data[0]);
         if (uart_desc_lut_dynamic[eUartDebug].rx_data[0] == (uint8_t)('\n')) {
             uart_desc_lut_dynamic[eUartDebug].uart_set_flag(eUartDebug);
         }
         HAL_UART_Receive_IT(&uart_desc_lut_dynamic[eUartDebug].uart_handle, uart_desc_lut_dynamic[eUartDebug].rx_data, 1);
+        #endif
     } 
     if((*huart).Instance==uart_desc_lut_dynamic[eUartModem].uart_handle.Instance){
-    	if (uart_desc_lut_dynamic[eUartModem].rx_data[0]!=0)
+    	#ifdef DEBUGO_KODAS
+        tx_pc[tx_pc_index] = uart_desc_lut_dynamic[eUartDebug].rx_data[0]; 
+        if (tx_pc[tx_pc_index]=='\n') {
+            UART_Driver_Send_String(eUartDebug, tx_pc, tx_pc_index); 
+            tx_pc_index = 0 ;
+        } else { 
+            tx_pc_index++; 
+        }
+        HAL_UART_Receive_IT(&uart_desc_lut_dynamic[eUartDebug].uart_handle, uart_desc_lut_dynamic[eUartDebug].rx_data, 1);
+
+        #else 
+        if (uart_desc_lut_dynamic[eUartModem].rx_data[0]!=0)
     		RingBuffer_Put(uart_desc_lut_dynamic[eUartModem].rb_handle, uart_desc_lut_dynamic[eUartModem].rx_data[0]);
-        if (uart_desc_lut_dynamic[eUartModem].rx_data[0] == (uint8_t)('\n')) {
+        if ((uart_desc_lut_dynamic[eUartModem].rx_data[0] == (uint8_t)('\n'))
+            ||uart_desc_lut_dynamic[eUartModem].rx_data[0] == (uint8_t)('>')) {
             uart_desc_lut_dynamic[eUartModem].uart_set_flag(eUartModem);
         }
         HAL_UART_Receive_IT(&uart_desc_lut_dynamic[eUartModem].uart_handle, uart_desc_lut_dynamic[eUartModem].rx_data, 1);
+        #endif
     } 
  }
 
@@ -199,7 +236,7 @@ bool UART_Driver_Send_String (eUart_t uart, uint8_t *uart_tx, uint16_t size) {  
     for (tx_size=0; (tx_size<UART_TX_MAX) && (tx_size < size); tx_size ++){
     	if (*(uart_tx+tx_size) == 0) break;
     }
-	HAL_UART_Transmit_IT(&uart_desc_lut_dynamic[uart].uart_handle, uart_tx, tx_size);
+	HAL_UART_Transmit(&uart_desc_lut_dynamic[uart].uart_handle, uart_tx, tx_size, 50);
     return true;
 }
 

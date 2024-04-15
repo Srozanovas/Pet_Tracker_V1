@@ -2,12 +2,22 @@
  * Includes
  *********************************************************************************************************************/
 #include "cli_function_list.h"
+#include "gpio_driver.h"
 #include "string.h"
 #include "stdlib.h"
 
 
 #include "modem_api.h"
 #include "power_api.h"
+
+
+
+bool Misc_Command_WritePin(char * params);
+bool Misc_Command_InitPin(char * params);
+bool Misc_Command_TogglePin(char * params);
+
+
+
 
 const sCommandFunctions_t modem_command_function_lut[eModemCommandsLast] = {
 	[eModemCommandsSendCommand] = {.name = "SEND",			.function_pointer = &Modem_API_SendCommand},
@@ -31,6 +41,91 @@ const sCommandFunctions_t acce_command_function_lut[eAcceCommandsLast]={
 const sCommandFunctions_t eeprom_command_function_lut[eEEPROMCommandsLast]={
 	[eEEPROMCommandsFirst]	= {.name = "A", .function_pointer = NULL}	
 };
+
+const sCommandFunctions_t misc_command_function_lut[eMiscCommandsLast] = { 
+	[eMiscCommandsWritePin] 	= {.name = "WRITEPIN", .function_pointer = &Misc_Command_WritePin}, 
+	[eMiscCommandsInitPin]		= {.name = "INITPIN", .function_pointer = &Misc_Command_InitPin}, 
+	[eMiscCommandsTogglePin] 	= {.name = "TOGGLEPIN", .function_pointer = &Misc_Command_TogglePin}, 
+};
+
+
+
+
+bool gpio_pin_parser (eGpioPin_t *gpio_p, eGpioPinState_t *pin_sta, char* params){
+	eGpioPin_t gpio_pin; 
+	eGpioPinState_t pin_state; 
+	uint8_t i = 0; 
+	uint8_t temp;
+	char t[10]={0};
+	uint8_t t_index = 0; 
+	for (i = 0; i<50; i++, t_index++){ 
+		if(i == 5 || params[i] == 0) return false; //should not reach here if ok 
+		else { 
+			if (params[i] == ',') break;
+			if ((params[i] >= '0') && (params[i] <= '9')) t[t_index] = (params[i] - '0'); 
+		}
+	}
+	if (t_index > 2) return false; //max allowed two digits
+	if (t_index == 1) temp = t[0];  //one digits
+	else temp = t[0] * 10 + t[1];  //two digits  
+	gpio_pin = (eGpioPin_t)temp; 
+	if (gpio_pin >= eGpioPinLast) return false; //not good parameter, too big pin number
+	i++; //because break in previous for loop
+
+	t[0] = t[1] = t_index = 0; 
+	for ( ; i<50; i++, t_index++){ 
+		if (i>10 || params[i] == 0) return false; //should not reach here if ok
+		else {
+			if (params[i] >= '0' && params[i] <= '9'){
+			 	t[t_index] = (params[i] - '0');
+				break; 
+			}
+		}
+	} 
+	if (t[0] == 1) pin_state = ePinHigh;
+	else if (t[0] == 0) pin_state = ePinLow;
+	else pin_state = ePinNaN;
+	if (pin_state>=ePinNaN) return false; //noot good parameter not 1 or 0
+
+	//everythings good, params parsed
+	*gpio_p = gpio_pin; 
+	*pin_sta = pin_state; 
+	return true; 
+}
+
+
+
+
+
+
+bool Misc_Command_WritePin (char *params){
+	eGpioPin_t gpio_pin; 
+	eGpioPinState_t pin_state; 
+	if (gpio_pin_parser(&gpio_pin, &pin_state, params)!=true) return false; 
+	if ((gpio_init_status & (1<<gpio_pin)) == 0) return false;
+	if (GPIO_Driver_WritePin(gpio_pin, pin_state) != true) return false; 
+	return true; 
+
+
+
+}
+
+bool Misc_Command_InitPin (char *params){
+	eGpioPin_t gpio_pin; 
+	eGpioPinState_t pin_state; 
+	if (gpio_pin_parser(&gpio_pin, &pin_state, params)!=true) return false;
+	if (GPIO_Driver_Init(gpio_pin, pin_state) != true) return false; 
+	return true; 
+}
+
+bool Misc_Command_TogglePin (char *params){
+	eGpioPin_t gpio_pin; 
+	eGpioPinState_t pin_state; 
+	if (gpio_pin_parser(&gpio_pin, &pin_state, params)!=true) return false;
+	if ((gpio_init_status & (1<<gpio_pin)) == 0) return false;
+	if (GPIO_Driver_TogglePin(gpio_pin) != true) return false; 
+	return true; 
+}
 
 
 

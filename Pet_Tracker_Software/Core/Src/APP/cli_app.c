@@ -57,6 +57,10 @@ void CLI_APP_Thread (void *argument) {
                     eeprom_command_function_lut[cli_app_command_struct->command].function_pointer(cli_app_command_struct->params);
                     break;
                 }
+                case eCommandModulesMisc: {
+                	misc_command_function_lut[cli_app_command_struct->command].function_pointer(cli_app_command_struct->params);
+                	break;
+                }
                 case eCommandModulesERROR:
                 default : break;
             }
@@ -68,6 +72,16 @@ void CLI_APP_Thread (void *argument) {
     }
     osThreadTerminate(cli_app_thread_id);
 }
+
+
+
+
+
+
+
+
+
+
 /**********************************************************************************************************************
  * Definitions of exported functions
  *********************************************************************************************************************/

@@ -21,14 +21,16 @@ uint8_t uart_flag = 0;
 //uart api thread  
 const osThreadAttr_t uart_api_thread_atr = {
     .name = "uart_api_thread",
-    .stack_size = 1024,
+    .stack_size = 2048,
     .priority = osPriorityHigh
 };
 osThreadId_t uart_thread_id = NULL;
 
 //uart data queue
-const osMessageQueueAttr_t uart_data_queue_atr= {.name = "uart_data_queue"};
-osMessageQId uart_data_queue_id;
+const osMessageQueueAttr_t command_data_queue_atr= {.name = "command_data_queue"};
+osMessageQId command_data_queue_id;
+const osMessageQueueAttr_t modem_data_queue_atr= {.name = "modem_data_queue"};
+osMessageQId modem_data_queue_id;
 
 //uart mutexes
 const osMutexAttr_t debug_send_string_mutex_atr    = {.name = "debug_send_string_mutex"};
@@ -48,7 +50,7 @@ static sUartControl_t uart_buffer_lut[] = {
         .buffer = NULL, 
         .index = 0, 
         .state = eUartStateLast, 
-        .size = 1024, 
+        .size = 250,
         .mutex_id = NULL,
         .mutex_atr = &debug_send_string_mutex_atr, 
         .uart_flag = DEBUG_UART_GOT_MESSAGE
@@ -57,7 +59,7 @@ static sUartControl_t uart_buffer_lut[] = {
         .buffer = NULL, 
         .index = 0, 
         .state = eUartStateLast, 
-        .size = 1024, 
+        .size = 250,
         .mutex_id = NULL,
         .mutex_atr = &modem_send_string_mutex_atr, 
         .uart_flag = MODEM_UART_GOT_MESSAGE
@@ -77,12 +79,16 @@ bool UART_API_Init (eUart_t uart_id, eBaudRate_t baudrate) {
         uart_flags = osEventFlagsNew(NULL);
         if (uart_flags == NULL) {
         	return false;
+        } else {
+            uart_init_status |= UART_FLAGS_INIT; 
         }
     }
 
     //INITIALIZE UART DRIVER AND GIVE SETFLAG FUNCTION 
     if (UART_Driver_Init(uart_id, baudrate, &UART_API_SetFlag) != true) {
     	return false;
+    } else { 
+        uart_init_status |=  (uart_id == eUartDebug)? DEBUG_UART_DRIVER_INIT : MODEM_UART_DRIVER_INIT; 
     }
 
 
@@ -91,22 +97,38 @@ bool UART_API_Init (eUart_t uart_id, eBaudRate_t baudrate) {
 		uart_buffer_lut[uart_id].mutex_id = osMutexNew(uart_buffer_lut[uart_id].mutex_atr);
 		if (uart_buffer_lut[uart_id].mutex_id == NULL) {
 			return false;
-		}
+		} else { 
+            uart_init_status |= (uart_id == eUartDebug)? DEBUG_UART_MUTEX_INIT : MODEM_UART_MUTEX_INIT;
+        }
     }
 
     //CREATE MESSAGE QUEES TO PUT MESSAGES FOR CMD API 
-    if (uart_data_queue_id == NULL){ 
-        uart_data_queue_id = osMessageQueueNew(UART_QUEUE_SIZE, sizeof(sUartData_t), &uart_data_queue_atr);
-        if (uart_data_queue_id == NULL) {
+    if (command_data_queue_id == NULL){ 
+        command_data_queue_id = osMessageQueueNew(UART_QUEUE_SIZE, sizeof(sUartData_t), &command_data_queue_atr);
+        if (command_data_queue_id == NULL) {
         	return false;
+        } else{ 
+            uart_init_status |= DEBUG_MESSAGE_QUEUE_INIT; 
         }
     }
+    if (modem_data_queue_id == NULL){ 
+        modem_data_queue_id = osMessageQueueNew(UART_QUEUE_SIZE, sizeof(sUartData_t), &modem_data_queue_atr);
+        if (modem_data_queue_id == NULL) {
+            return false;
+        } else{ 
+            uart_init_status |= MODEM_MESSAGE_QUEUE_INIT; 
+        }
+    }
+
+
     
 
     //INITIALIZE CMD THREAD FOR CUTTING UART DATA INTO COMMANDS 
 
     if (CMD_API_ThreadInit() == false){ 
     	return false;
+    } else { 
+        pet_tracker_init_status |= CMD_API_INITIALISED;
     }
 
 
@@ -116,11 +138,16 @@ bool UART_API_Init (eUart_t uart_id, eBaudRate_t baudrate) {
         uart_thread_id = osThreadNew(UART_API_Thread, NULL, &uart_api_thread_atr);
         if (uart_thread_id == NULL) {
             return false;
+        } else { 
+            threads_status |= UART_API_THREAD_INIT;
         }
     }
     
+    uart_init_status |= (uart_id == eUartDebug)? DEBUG_UART_ENABLED : MODEM_UART_ENABLED;
     return true;
 }
+
+
 
 void UART_API_Thread (void *argument) {
     uint32_t uart_got_message = 0;
@@ -128,9 +155,10 @@ void UART_API_Thread (void *argument) {
 		uart_got_message = 0;
         uart_got_message = UART_API_WaitFlag();
         if (uart_got_message != 0){
-            eUart_t uart; 
+            eUart_t uart = eUartDebug;
             if ((uart_got_message & DEBUG_UART_GOT_MESSAGE) != 0) uart = eUartDebug; 
             else if ((uart_got_message & MODEM_UART_GOT_MESSAGE) != 0) uart = eUartModem; 
+
             switch (uart_buffer_lut[uart].state) {
                 case eUartStateInit: {
                     uart_buffer_lut[uart].buffer = (uint8_t*) calloc(uart_buffer_lut[uart].size, sizeof(uint8_t));
@@ -155,15 +183,13 @@ void UART_API_Thread (void *argument) {
                     }
                 }
                 case eUartStateSend:
-                    uart_data.buffer_adress = (char*)uart_buffer_lut[uart].buffer;
-                    uart_data.size = uart_buffer_lut[uart].index;
-                    if (uart == eUartModem){
-                    	UART_API_SendString(eUartDebug, uart_data.buffer_adress, uart_data.size);
-                    	free(uart_data.buffer_adress);
-						if (osMessageQueuePut(uart_data_queue_id, &uart_data, osPriorityHigh, UART_QUEUE_PUT_TIMEOUT) != osOK) {
-
-						}
-                    }
+                	uart_data.buffer_adress = (char*)uart_buffer_lut[uart].buffer;
+                	uart_data.size = uart_buffer_lut[uart].index;
+                	if (uart == eUartModem){
+                		if (osMessageQueuePut(modem_data_queue_id, &uart_data, osPriorityHigh, UART_QUEUE_PUT_TIMEOUT) != osOK) {}
+                	} else {
+                        if (osMessageQueuePut(command_data_queue_id, &uart_data, osPriorityHigh, UART_QUEUE_PUT_TIMEOUT) != osOK) {}
+                	}
                     uart_buffer_lut[uart].state = eUartStateInit;
                     break;
                 default:
@@ -191,10 +217,21 @@ bool UART_API_SendString (eUart_t uart, char *string, uint16_t size) {
     osMutexRelease(uart_buffer_lut[uart].mutex_id);
     return true;
 }
-osStatus_t stat;
+
 
 bool UART_API_GetMessage (sUartData_t *acquired_buffer, uint32_t wait_time) {
-	stat = osMessageQueueGet(uart_data_queue_id, acquired_buffer, NULL, wait_time);
+	osStatus_t stat;
+    stat = osMessageQueueGet(command_data_queue_id, acquired_buffer, NULL, wait_time);
+	if ( stat != osOK) {
+        return false;
+    }
+    return true;
+}
+
+
+bool UART_API_GetModemMessage(sUartData_t *acquired_buffer, uint32_t wait_time){ 
+    osStatus_t stat;
+    stat = osMessageQueueGet(modem_data_queue_id, acquired_buffer, NULL, wait_time);
 	if ( stat != osOK) {
         return false;
     }
@@ -206,14 +243,14 @@ uint32_t UART_API_WaitFlag () {
     return flag;
 }
 
-bool UART_API_SetFlag (eUart_t uart) {
-    
-    if (uart == eUartDebug){
-    	if (osEventFlagsSet(uart_flags, DEBUG_UART_GOT_MESSAGE) == 0) return false;
-    }
-    else if (uart == eUartModem)
-    	if (osEventFlagsSet(uart_flags, MODEM_UART_GOT_MESSAGE) == 0) return false;
 
+bool UART_API_SetFlag (eUart_t uart) {
+    if (uart == eUartDebug){
+      if (osEventFlagsSet(uart_flags, DEBUG_UART_GOT_MESSAGE) == 0) return false;
+    }
+    else if (uart == eUartModem){
+        if (osEventFlagsSet(uart_flags, MODEM_UART_GOT_MESSAGE) == 0) return false;
+    }
     return true;
 }
 

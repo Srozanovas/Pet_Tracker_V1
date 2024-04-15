@@ -31,8 +31,45 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#define DEBUG_UART_ENABLED	(1<<0)
-#define MODEM_UART_ENABLED	(1<<1)
+//#define DEBUGO_KODAS
+
+//status flags 
+extern uint32_t gpio_init_status;
+extern uint32_t gpio_pin_level_status;
+extern uint16_t  uart_init_status;
+extern uint16_t pet_tracker_init_status;
+extern uint32_t pet_tracker_status;
+extern uint16_t threads_status;
+
+
+
+
+//UART INIT FLAGS 
+#define DEBUG_UART_DRIVER_INIT  (1U<<0)
+#define DEBUG_UART_MUTEX_INIT   (1U<<1)  
+#define MODEM_UART_DRIVER_INIT  (1U<<2)
+#define MODEM_UART_MUTEX_INIT   (1U<<3) 
+#define DEBUG_MESSAGE_QUEUE_INIT  (1U<<4)
+#define MODEM_MESSAGE_QUEUE_INIT  (1U<<5)
+#define UART_FLAGS_INIT         (1U<<6)
+#define DEBUG_UART_ENABLED	    (1U<<7)
+#define MODEM_UART_ENABLED	    (1U<<8)
+
+//PET TRACKER INIT FLAGS 
+#define CMD_API_INITIALISED     (1U<<0)
+#define CLI_APP_INITIALISED     (1U<<1)
+
+
+//THREADS STATUS 
+#define UART_API_THREAD_INIT    (1U<<0)
+#define UART_API_THREAD_STOPPED (1U<<1)
+
+
+
+//MESSAGE QUEUES PARAMS
+#define COMMAND_QUEUE_SIZE 10
+#define COMMANDS_QUEUE_PUT_TIMEOUT 100
+#define MODULE_MAX_NAME 20
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
