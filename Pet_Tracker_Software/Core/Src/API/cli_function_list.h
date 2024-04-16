@@ -20,6 +20,7 @@ typedef enum eModemCommands_t {
     eModemCommandsFirst = 0, 
     eModemCommandsSendCommand = eModemCommandsFirst, 
     eModemCommandsGNSSPower, 
+    eModemCommandsSendSMS,
     eModemCommandsLast
 } eModemCommands_t;
 

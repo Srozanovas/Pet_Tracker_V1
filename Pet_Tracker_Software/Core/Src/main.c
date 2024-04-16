@@ -19,7 +19,6 @@ uint16_t threads_status = 0 ;
 
 
 
-
 osThreadId_t defaultTaskHandle;
 const osThreadAttr_t defaultTask_attributes = {
   .name = "defaultTask",

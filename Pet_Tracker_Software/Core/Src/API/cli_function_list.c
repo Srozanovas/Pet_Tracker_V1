@@ -22,6 +22,7 @@ bool Misc_Command_TogglePin(char * params);
 const sCommandFunctions_t modem_command_function_lut[eModemCommandsLast] = {
 	[eModemCommandsSendCommand] = {.name = "SEND",			.function_pointer = &Modem_API_SendCommand},
 	[eModemCommandsGNSSPower]	= {.name = "GNSSPOWER", 	.function_pointer = &Modem_API_GNSS_Power},
+	[eModemCommandsSendSMS]		= {.name = "SMS", 			.function_pointer = &Modem_API_SendSMS},
 };
 const sCommandFunctions_t led_command_function_lut[eLEDCommandsLast]={
 	[eLEDCommandsFirst]	= {.name = "A", .function_pointer = NULL}

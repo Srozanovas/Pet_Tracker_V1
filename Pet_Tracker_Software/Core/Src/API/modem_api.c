@@ -5,9 +5,12 @@
 #include "stdlib.h"
 #include "cmsis_os2.h"
 #include "cmd_api.h"
+#include "stdarg.h"
 
 
-
+#define MODEM_WAIT_FOR_SMS 	(1U<<0)
+#define MODEM_OK 			(1U<<1)
+#define MODEM_ERROR			(1U<<2)
 
 typedef enum eModemATCommandAnswer { 
     eModemATFirst = 0,
@@ -16,6 +19,8 @@ typedef enum eModemATCommandAnswer {
     eModemATCMGI, 
     eModemATCMGF,
 	eModemATCPIN,
+    eModemATCMGS,
+    eModemATWait, 
     eModemATLast, 
 } eModemATCommandAnswer;
 
@@ -24,7 +29,9 @@ const char modem_commands_lut[eModemATLast][20] = {
     [eModemATError]     = "ERROR",
     [eModemATCMGI]      = "+CMGI:",
     [eModemATCMGF]      = "+CMGF:",
-	[eModemATCPIN]		= "+CPIN:"
+	[eModemATCPIN]		= "+CPIN:", 
+    [eModemATCMGS]      = "+CMGS:",
+    [eModemATWait]      = ">"
 }; 
 
 
@@ -53,11 +60,14 @@ const osThreadAttr_t modem_answers_thread_atr = {
 };
 osThreadId_t modem_answers_thread_id = NULL;
 
+osMutexId_t modem_mutex_id = NULL; 
+const osMutexAttr_t modem_mutex_atr    = {.name = "modem_send_mutex"};
 
 
 //message queue for commands
 const osMessageQueueAttr_t modem_answer_queue_atr = {.name = "modem_answers_queue"};
 osMessageQId modem_answer_queue_id;
+osEventFlagsId_t modem_flags = NULL;
 
 
 
@@ -77,6 +87,13 @@ bool Modem_API_Init(){
         } 
     }
 
+    if (modem_mutex_id == NULL){
+		modem_mutex_id = osMutexNew(&modem_mutex_atr);
+		if (modem_mutex_id == NULL) {
+			return false;
+		}
+    }
+
     if (modem_api_thread_id == NULL){
 		modem_api_thread_id = osThreadNew(Modem_API_MessageThread, NULL, &modem_api_thread_atr);
 		if (modem_api_thread_id == NULL) return false;
@@ -87,6 +104,12 @@ bool Modem_API_Init(){
    		if (modem_answers_thread_id == NULL) return false;
        }
 
+    if (modem_flags == NULL) {
+    	modem_flags = osEventFlagsNew(NULL);
+    	if (modem_flags == NULL) {
+    		return false;
+    	}
+    }
 
     return true;  
 }
@@ -163,9 +186,11 @@ void Modem_API_AnswerThread(){
         else { 
             switch(parsed_message->at_command) {
                 case eModemATOK: { 
+                    osEventFlagsSet(modem_flags, MODEM_OK); 
                     break; 
                 } 
                 case eModemATError:{
+                    osEventFlagsSet(modem_flags, MODEM_ERROR); 
                     break;
                 } 
                 case eModemATCMGI:{
@@ -175,7 +200,11 @@ void Modem_API_AnswerThread(){
                     break;
                 }
 	            case eModemATCPIN:{
-	            	__NOP();
+	            	
+                    break;
+                }
+                case eModemATWait:{ 
+                    osEventFlagsSet(modem_flags, MODEM_WAIT_FOR_SMS);
                     break;
                 }
                 case eModemATLast:{
@@ -192,9 +221,123 @@ void Modem_API_AnswerThread(){
 
 
 bool Modem_API_SendCommand(char * params){
-    UART_API_SendString(eUartModem, params, 250);
+
+    Modem_API_SendWait(params, eModemSendWaitNo);
     return true;
 }
+
+
+bool Modem_API_SendSMS(char *params){ 
+    char temp_buf[100]={0}; 
+    char modem_tx[100] = {0};
+    //PARSE PHONE NUMBER
+    uint8_t i = 0;
+    uint8_t t_index = 0;
+    uint8_t flag = 0;
+    for (i = 0; i<10; i++){
+        if (params[i] == '+'){
+            temp_buf[t_index++] = params[i];
+            break; //find '+' sign 
+        }
+    }
+    i++;
+    if (i == 10) return false;   
+    for ( ; i <30; i++){ // parse phone 
+        if (params[i]>='0' && params[i]<='9') temp_buf[t_index++] = params[i];
+        if (params[i] == ',') break; //
+    }
+
+    if (t_index > 5){ //assuming that phone number is good 
+        snprintf(modem_tx,120,"AT+CMGS=\"%s\"\n", temp_buf);
+        if (Modem_API_SendWait(modem_tx, eModemSendWaitFlagCustom, 1000, MODEM_WAIT_FOR_SMS))
+        	flag = 1;
+        else flag = 0;
+    }  
+
+    for ( ; t_index>0; t_index--){ 
+        temp_buf[t_index] = 0 ; 
+    }
+    temp_buf[0] = 0 ;
+    i++; 
+
+    for ( ; i<130; i++){ 
+        if ((params[i] != '\n') || (params[i] != 0))
+            {
+                temp_buf[t_index++] = params[i]; 
+            }
+        if (params[i] == '\n') break;
+    }
+    temp_buf[t_index++] = 26;
+    if (flag == 1){
+    	if(Modem_API_SendWait(temp_buf, eModemSendWaitFlagCustom, 2000, MODEM_OK))
+    		flag = 2;
+    }
+    
+
+
+
+
+    return true;
+}
+
+
+bool Modem_API_SendWait(char * params, eModemSendWait modem_wait, ...){
+    uint32_t wait_time =  0xFFFFFFFF; 
+    uint32_t wait_flag =  0xFFFFFFFF;
+    uint32_t got_flag;
+    va_list arg_list; 
+    va_start (arg_list, modem_wait);
+    if ((modem_wait == eModemSendWaitCustom) 
+        ||(modem_wait == eModemSendWaitFlagCustom)){
+            wait_time = va_arg(arg_list, uint32_t); 
+    } else {
+    	wait_time = 0;
+    }
+    if ((modem_wait == eModemSendWaitFlagCustom) 
+        ||(modem_wait == eModemSendWaitFlagForever)){
+    		wait_flag = va_arg(arg_list, uint32_t);
+    		if (wait_time == 0) wait_time = 0xFFFFFFFF;
+    }
+    va_end(arg_list);
+    if (osMutexAcquire(modem_mutex_id, 0) != osOK){
+        return false; //mutex is not free
+    } else {
+        if ((modem_wait == eModemSendWaitFlagCustom) 
+            ||(modem_wait == eModemSendWaitFlagForever)){
+                osEventFlagsClear(modem_flags, wait_flag);
+        }
+        UART_API_SendString(eUartModem, params, 250);
+        switch (modem_wait) {
+        	case eModemSendWaitNo: {
+        		osMutexRelease(modem_mutex_id);
+        		return true;
+        	}
+        	case eModemSendWaitCustom: {
+        		osDelay(wait_time);
+        		osMutexRelease(modem_mutex_id);
+        		return true;
+        	}
+        	case eModemSendWaitFlagCustom:
+        	case eModemSendWaitFlagForever:{
+				got_flag = osEventFlagsWait(modem_flags, wait_flag, osFlagsWaitAll, wait_time);
+        		osMutexRelease(modem_mutex_id);
+        		if ((got_flag & wait_flag) == wait_flag){
+        			return true;
+        		} else {
+        			return false;
+        		}
+        	}
+        	default: {
+        		osMutexRelease(modem_mutex_id);
+        		return false;
+        	}
+        }
+    }
+    return true; 
+}
+
+
+
 
 bool Modem_API_GNSS_Power(char *params){
     uint8_t i=0;
@@ -209,12 +352,6 @@ bool Modem_API_GNSS_Power(char *params){
 
 
 
-
-
-
-bool Modem_API_ATOK(char *params){
-	return true;
-}
 
 
 
