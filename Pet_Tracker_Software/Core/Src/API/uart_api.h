@@ -38,6 +38,6 @@ bool UART_API_SendString (eUart_t uart,char *string, uint16_t size );
 bool UART_API_GetMessage (sUartData_t *acquired_buffer, uint32_t wait_time);
 bool UART_API_GetModemMessage(sUartData_t *acquired_buffer, uint32_t wait_time);
 bool UART_API_SetFlag(eUart_t uart);
-
+bool UART_API_PutToQueue(eUart_t uart, char *data);
 
 #endif /* __SOMETHING__H__ */

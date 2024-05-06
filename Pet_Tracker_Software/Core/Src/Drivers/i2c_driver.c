@@ -128,14 +128,13 @@ bool I2C_Low_Level_Init(eI2C_t i2c_name){ //GPIO, CLOCK, INTERUPT INITIALIZATION
 
 
 
-
 bool I2C_Driver_Send(eI2C_t I2C, uint8_t device_adress, uint16_t memory_adress, uint8_t mem_size, uint8_t *tx_data, uint8_t size){ //I2C SEND DATA
-    HAL_I2C_Mem_Write_IT(&i2c_desc_lut_dynamic[eI2CEeprom].i2c_handle, device_adress, memory_adress, mem_size, tx_data, size); 
+    HAL_I2C_Mem_Write(&i2c_desc_lut_dynamic[I2C].i2c_handle, device_adress, memory_adress, mem_size, tx_data, size,100); 
     return true;
 }
 
 bool I2C_Driver_Read(eI2C_t I2C, uint8_t device_adress, uint16_t memory_adress, uint8_t mem_size, uint8_t *rx_data, uint8_t size){  //I2C READ DATA
-    HAL_I2C_Mem_Read_IT(&i2c_desc_lut_dynamic[eI2CEeprom].i2c_handle, device_adress, memory_adress, mem_size, rx_data, size); 
+    HAL_I2C_Mem_Read(&i2c_desc_lut_dynamic[I2C].i2c_handle, device_adress, memory_adress, mem_size, rx_data, size,100); 
     return true;
 }
 

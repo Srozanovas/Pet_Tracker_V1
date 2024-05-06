@@ -40,9 +40,17 @@ extern uint16_t  uart_init_status;
 extern uint16_t pet_tracker_init_status;
 extern uint32_t pet_tracker_status;
 extern uint16_t threads_status;
+extern uint16_t epo_file_status; 
+extern uint16_t pet_tracker_options;
+extern uint8_t pet_tracker_apn[50];
+extern uint8_t gnss_status; 
+extern char latitude[20];
+extern char longitude[20];
+extern char time_of_fix[20];
+extern uint8_t allowed_contacts[10][20];
 
 
-
+#define EPO_DOWNLOAD_LINK "http://wepodownload.mediatek.com/EPO_GPS_3_1.DAT"
 
 //UART INIT FLAGS 
 #define DEBUG_UART_DRIVER_INIT  (1U<<0)
@@ -70,6 +78,34 @@ extern uint16_t threads_status;
 #define COMMAND_QUEUE_SIZE 10
 #define COMMANDS_QUEUE_PUT_TIMEOUT 100
 #define MODULE_MAX_NAME 20
+
+
+
+//PET TRACKER STATUS FLAGS
+
+#define GNSS_POWER_ON  		  (1U<<0)
+#define MODEM_POWER_ON		  (1U<<1)
+#define LED_POWER_ON		    (1U<<2)
+#define ACCE_POWER_ON 		  (1U<<3)
+#define REGISTERED_TO_NET	  (1U<<4)
+#define V4_POWER_ON			    (1U<<5)
+#define WAITING_FOR_MESSAGE (1U<<6)
+#define MODEM_INITIALISED   (1U<<7)
+
+//PET_TRACKER_OPTIONS 
+
+#define AGPS_ENABLE     (1U<<0)
+#define DEBUG_ENABLE    (1U<<1)
+#define FULL_DEBUG      (1U<<2)
+#define GNSS_FULL_PARSE (1U<<3)
+
+
+
+//GNSS STATUS FLAGS 
+
+#define GNSS_FIX_COMPLETE       (1U<<0)
+#define EPO_DOWNLOAD_COMPLETE   (1U<<1)
+
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/

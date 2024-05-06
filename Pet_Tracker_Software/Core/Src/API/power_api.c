@@ -21,7 +21,7 @@ uint8_t POWER_API_ParseLevel(char* params) {
     return power;
 }
 
-bool POWER_API_PinControl(eGpioPin_t gpio_pin, uint8_t power){ 
+bool POWER_API_PinControl(eGpioPin_t gpio_pin, uint8_t power){
     switch (gpio_pin) {
         case eGpioPinA12LEDsOn: {
             if (power == 0){ //turn off                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              if (power == 0) { //turn off
@@ -65,15 +65,12 @@ bool POWER_API_4VPower(char* params){
     }
     return POWER_API_PinControl(eGpioPinB0Power4V, POWER_API_ParseLevel(params));
 } 
-bool POWER_API_GNSSPower(char *params){
-    return true;
-} 
 
 
 bool POWER_API_ModemPower(char *params){
     uint8_t power = POWER_API_ParseLevel(params);
     if(power == 1){ 
-
+    	if ((pet_tracker_status & MODEM_POWER_ON) != 0) return true; //already powered
         //CHECK IF NECESSERY PINS ARE INITIALIZED AND ON: 
         if ((gpio_pin_level_status & (1<<eGpioPinB0Power4V)) == 0) { 
             if ((gpio_init_status & (1<<eGpioPinB0Power4V)) == 0) { 
@@ -101,13 +98,20 @@ bool POWER_API_ModemPower(char *params){
         osDelay(1000); 
         if (GPIO_Driver_WritePin(eGpioPinA6GSMPower, ePinHigh) == false) return false; 
         
+        pet_tracker_status |= MODEM_POWER_ON; // add power on flag
+
+
     } else {  
+    	if ((pet_tracker_status & MODEM_POWER_ON) == 0) return true; //already off
         if ((gpio_pin_level_status & (1<<eGpioPinA6GSMPower)) != 0) { 
             if (GPIO_Driver_WritePin(eGpioPinA6GSMPower, ePinLow) == false) return false; 
             osDelay(1000); 
             if (GPIO_Driver_WritePin(eGpioPinA6GSMPower, ePinHigh) == false) return false; 
         }
+        pet_tracker_status &= ~MODEM_POWER_ON; //clear power on flag
+        pet_tracker_status &= ~MODEM_INITIALISED;
     }
+
     return true;
 }
 

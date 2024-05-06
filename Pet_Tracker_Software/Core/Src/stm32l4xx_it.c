@@ -90,6 +90,12 @@ void HardFault_Handler(void)
   while (1)
   {
     /* USER CODE BEGIN W1_HardFault_IRQn 0 */
+	  static int i=0;
+	  //i++;
+	  HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_12);
+	  HAL_Delay(500);
+
+	  //if (i==10)NVIC_SystemReset();
     /* USER CODE END W1_HardFault_IRQn 0 */
   }
 }
@@ -179,25 +185,5 @@ void TIM1_UP_TIM16_IRQHandler(void)
 }
 
 /**
-  * @brief This function handles I2C1 event interrupt.
-  */
-
-
-/**
-  * @brief This function handles I2C2 event interrupt.
-  */
-
-
-/**
   * @brief This function handles USART1 global interrupt.
   */
-
-
-/**
-  * @brief This function handles USART2 global interrupt.
-  */
-
-
-/* USER CODE BEGIN 1 */
-
-/* USER CODE END 1 */

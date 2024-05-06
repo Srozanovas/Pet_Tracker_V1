@@ -6,11 +6,13 @@
 #include "cmsis_os2.h"
 #include "cmd_api.h"
 #include "stdarg.h"
+#include "cli_function_list.h"
 
 
 #define MODEM_WAIT_FOR_SMS 	(1U<<0)
 #define MODEM_OK 			(1U<<1)
 #define MODEM_ERROR			(1U<<2)
+
 
 typedef enum eModemATCommandAnswer { 
     eModemATFirst = 0,
@@ -20,10 +22,17 @@ typedef enum eModemATCommandAnswer {
     eModemATCMGF,
 	eModemATCPIN,
     eModemATCMGS,
-    eModemATWait, 
+    eModemATWait,
+    eModemATCGNSCHK,
+    eModemATCGNSINF, 
+    eModemATCMGR, 
+    eModemATCMTI,
+	eModemATHTTPACTION,
+	eModemATPSUTTZ,
+	eModemATDST,
+	eModemATNotParsed,
     eModemATLast, 
 } eModemATCommandAnswer;
-
 const char modem_commands_lut[eModemATLast][20] = { 
     [eModemATOK]        = "OK",
     [eModemATError]     = "ERROR",
@@ -31,39 +40,39 @@ const char modem_commands_lut[eModemATLast][20] = {
     [eModemATCMGF]      = "+CMGF:",
 	[eModemATCPIN]		= "+CPIN:", 
     [eModemATCMGS]      = "+CMGS:",
-    [eModemATWait]      = ">"
+    [eModemATWait]      = ">",
+    [eModemATCGNSCHK]   = "+CGNSCHK:",
+    [eModemATCGNSINF]   = "+CGNSINF:",
+    [eModemATCMGR]      = "+CMGR:", 
+    [eModemATCMTI]      = "+CMTI:",
+    [eModemATHTTPACTION]= "+HTTPACTION:",
+	[eModemATPSUTTZ]	= "*PSUTTZ:",
+	[eModemATDST]		= "DST:"
 }; 
 
 
 
 
-
+//RTOS VARIABLES ----------------------
 
 typedef struct sModemMessage { 
     eModemATCommandAnswer at_command; 
     char *command_answer; 
 }sModemMessage; 
-
-
-
 const osThreadAttr_t modem_api_thread_atr = {
     .name = "modem_api_thread",
     .stack_size = 512,
     .priority = osPriorityHigh
 };
 osThreadId_t modem_api_thread_id = NULL;
-
 const osThreadAttr_t modem_answers_thread_atr = {
     .name = "modem_answers_thread",
     .stack_size = 512,
     .priority = osPriorityNormal
 };
 osThreadId_t modem_answers_thread_id = NULL;
-
 osMutexId_t modem_mutex_id = NULL; 
 const osMutexAttr_t modem_mutex_atr    = {.name = "modem_send_mutex"};
-
-
 //message queue for commands
 const osMessageQueueAttr_t modem_answer_queue_atr = {.name = "modem_answers_queue"};
 osMessageQId modem_answer_queue_id;
@@ -73,14 +82,33 @@ osEventFlagsId_t modem_flags = NULL;
 
 //DATA VARIABLES
 sUartData_t modem_uart_data_unproccessed = {0}; //data from uart
+const char crcf[4] = {0x0D, 0x0A, 0x00, 0x00};
 
-
-
+//functions 
+//THREADS
 void Modem_API_MessageThread ();
 void Modem_API_AnswerThread();
 
+//UTILITY 
+uint8_t Modem_API_ParseToSymbol(char *text, char *parsed, char symbol);
+bool Modem_API_CleanBuffer(uint8_t *buf, uint16_t len);
+
+//RESPONSE 
+bool Modem_API_AT_Response_CGNSCHK(char *params);
+bool Modem_API_AT_Response_CGNSINF(char*params);
+bool Modem_API_AT_Response_HTTPACTION();
+bool Modem_API_AT_Response_CMTI(char *params);
+bool Modem_API_AT_Response_CMGR(char *params);
+bool Modem_API_AT_Response_NotParsed(char *params);
+
+//RTOS FUNCTIONS 
 bool Modem_API_Init(){ 
-    if (modem_answer_queue_id == NULL) {
+
+	UART_API_Init(eUartModem, eBaudRate9600);
+	GPIO_Driver_Init(eGpioPinA6GSMPower, ePinHigh);
+
+
+	if (modem_answer_queue_id == NULL) {
         modem_answer_queue_id = osMessageQueueNew(COMMAND_QUEUE_SIZE, sizeof(sModemMessage *), &modem_answer_queue_atr);
         if (modem_answer_queue_id == NULL) {
         	return false;
@@ -119,6 +147,18 @@ bool Modem_API_MessageParser(sUartData_t * raw_data, sModemMessage *parsed_messa
     uint8_t index = 0; 
     uint8_t i = 0;
     parsed_message->at_command = eModemATLast;
+
+    if ((pet_tracker_status & WAITING_FOR_MESSAGE) != 0){ 
+    	 parsed_message->at_command = eModemATNotParsed;
+    	for (i = 0;  i < 30; i++){
+        	if (raw_data->buffer_adress[i] == '\n'){
+        		parsed_message->command_answer[i] = raw_data->buffer_adress[i];
+				return true;
+        	}
+        	else  parsed_message->command_answer[i] = raw_data->buffer_adress[i];
+        }
+    }
+
     for (i = 0;  i < 20; i++){ 
         if (raw_data->buffer_adress[i] == '\n') break;
         else if ((raw_data->buffer_adress[i] != '\n') && (raw_data->buffer_adress[i] != 13)) { 
@@ -134,7 +174,13 @@ bool Modem_API_MessageParser(sUartData_t * raw_data, sModemMessage *parsed_messa
             break; 
         }
     }
-    if (parsed_message->at_command == eModemATLast) return false;  //no command answer found on LUT 
+    if (parsed_message->at_command == eModemATLast){
+    	parsed_message->at_command = eModemATNotParsed;  //no command answer found on LUT
+    	for (int i = 0; i<index; i++){
+    		parsed_message->command_answer[i] = temporary [i];
+    	}
+    	return true;
+    }
     i++;
     index = 0; 
     for (  ; i<raw_data->size; i++){ 
@@ -145,8 +191,6 @@ bool Modem_API_MessageParser(sUartData_t * raw_data, sModemMessage *parsed_messa
     }
     return true; //everythings allright
 }
-
-
 
 void Modem_API_MessageThread ()  { 
     while(1) {
@@ -159,18 +203,11 @@ void Modem_API_MessageThread ()  {
 
             Modem_API_MessageParser(&modem_uart_data_unproccessed, modem_message);
             free (modem_uart_data_unproccessed.buffer_adress);
-            if (modem_message->at_command == eModemATLast){
-            	free(modem_message->command_answer);
-            	free(modem_message);
-            }else {
-				osMessageQueuePut(modem_answer_queue_id, &modem_message, osPriorityHigh, COMMANDS_QUEUE_PUT_TIMEOUT);
-            }
+			osMessageQueuePut(modem_answer_queue_id, &modem_message, osPriorityHigh, COMMANDS_QUEUE_PUT_TIMEOUT);
         }
-        
     }
     osThreadTerminate(modem_api_thread_id); 
 }
-
 
 void Modem_API_AnswerThread(){
 	while(1){
@@ -191,6 +228,7 @@ void Modem_API_AnswerThread(){
                 } 
                 case eModemATError:{
                     osEventFlagsSet(modem_flags, MODEM_ERROR); 
+                    HardFault_Handler();
                     break;
                 } 
                 case eModemATCMGI:{
@@ -207,6 +245,37 @@ void Modem_API_AnswerThread(){
                     osEventFlagsSet(modem_flags, MODEM_WAIT_FOR_SMS);
                     break;
                 }
+                case eModemATCGNSCHK:{ 
+                    Modem_API_AT_Response_CGNSCHK(parsed_message->command_answer);
+                    break;
+                }
+                case eModemATCGNSINF:{ 
+                    Modem_API_AT_Response_CGNSINF(parsed_message->command_answer);
+                    break;
+                }
+                case eModemATCMGR: {
+                    Modem_API_AT_Response_CMGR(parsed_message->command_answer);
+                    break; 
+                }
+                case eModemATCMTI: {
+                    Modem_API_AT_Response_CMTI(parsed_message->command_answer);
+                    break; 
+                }
+                case eModemATHTTPACTION:{
+                	Modem_API_AT_Response_HTTPACTION();
+                	break;
+                }
+                case eModemATNotParsed:{
+                	Modem_API_AT_Response_NotParsed(parsed_message->command_answer);
+                	break;
+                }
+            	case eModemATPSUTTZ:{
+					break;
+				}
+            	case eModemATDST:{
+            		pet_tracker_status |= MODEM_INITIALISED;
+					break;
+				}
                 case eModemATLast:{
                     break;
                 } 
@@ -218,6 +287,21 @@ void Modem_API_AnswerThread(){
 	}
 	osThreadTerminate(modem_answers_thread_id);
 }
+
+
+
+
+//MODEM COMMANDS (SENT THROUGH DEBUG OR SMS):
+
+
+bool Modem_API_GetLocation(char *params){
+	char modem_tx[20];
+	snprintf(modem_tx,20,"AT+CGNSINF\n");
+	Modem_API_SendWait(modem_tx, eModemSendWaitFlagCustom, 1000, MODEM_OK|MODEM_ERROR);
+
+	return true;
+}
+
 
 
 bool Modem_API_SendCommand(char * params){
@@ -273,15 +357,353 @@ bool Modem_API_SendSMS(char *params){
     		flag = 2;
     }
     
+    return true;
+}
 
 
+bool Modem_API_GNSS_Power(char *params){
+    uint8_t i=0;
+    char power[3]={0};
+    char modem_tx[20]={0};
+    uint32_t flags=0; 
+    i = Modem_API_ParseToSymbol(params, power, '\n' );
+    if (i == 0) return false; 
+    if (((power[0]-'0') == 1) || ((power[0]-'0') == 0)){
+    	power[0] -= '0';
+    	snprintf(modem_tx, 20, "AT+CGNSPWR=%d\n", power[0]);
+    } else {
+    	return false; //unknown value
+    }
 
+    if (((power[0] == 0) && ((pet_tracker_status & GNSS_POWER_ON) == 0))
+    	||((power[0] == 1) && ((pet_tracker_status & GNSS_POWER_ON) != 0))) return true; //already on or off
+    
+
+    Modem_API_SendWait(modem_tx, eModemSendWaitFlagCustom, 1000, MODEM_OK|MODEM_ERROR);
+    (power[0] == 0) ? (pet_tracker_status &= ~GNSS_POWER_ON) : (pet_tracker_status |= GNSS_POWER_ON);
+    if (power[0] == 0) return true;
+    if ((pet_tracker_options & AGPS_ENABLE) == 0) return true; //no agps
+
+    //agps 
+    Modem_API_CheckEpo(NULL); 
+    if (((epo_file_status & 1) == 0) || ((epo_file_status>>8) == 0)){
+        Modem_API_DownloadEPO(NULL); //download epo because no file or expired 
+        flags = osEventFlagsWait(modem_flags, MODEM_OK|MODEM_ERROR, osFlagsWaitAny, 20000);
+        if (flags != osErrorTimeout) Modem_API_CheckEpo(NULL);
+    }
+    if ((epo_file_status & 1) == 1) {
+    	snprintf(modem_tx, 20, "AT+CNTP\n");
+    	Modem_API_SendWait(modem_tx, eModemSendWaitCustom, 5000);
+        snprintf(modem_tx, 20, "AT+CGNSAID=31,1,1\n");
+        Modem_API_SendWait(modem_tx, eModemSendWaitFlagCustom, 2000, MODEM_OK|MODEM_ERROR) ; 
+    } else { 
+        return false; 
+    }
+    return true;
+}
+
+
+bool Modem_API_CheckEpo(char *params){
+    char modem_tx[] = "AT+CGNSCHK=3,1\n";
+    bool stat;
+    stat = Modem_API_SendWait(modem_tx, eModemSendWaitFlagCustom, 3000, MODEM_OK);
+    if (stat == false) return false;
+    return true;
+}
+
+
+bool Modem_API_DownloadEPO(char *params){ 
+    char modem_tx[100];
+    uint32_t stat;
+    snprintf (modem_tx, 50, "AT+SAPBR=3,1,\"CONTYPE\",\"GPRS\"\n");
+    stat = Modem_API_SendWait(modem_tx, eModemSendWaitFlagCustom, 1000, MODEM_OK|MODEM_ERROR);
+    if (stat == 0) return false; 
+
+    snprintf (modem_tx, 50, "AT+SAPBR=3,1,\"APN\",\"%s\"\n", pet_tracker_apn); //set apn
+    stat = Modem_API_SendWait(modem_tx, eModemSendWaitFlagCustom, 1000, MODEM_OK|MODEM_ERROR);
+    if (stat == 0) return false;
+   
+    snprintf (modem_tx, 50, "AT+SAPBR=0,1\n"); //disable bearer
+    stat = Modem_API_SendWait(modem_tx, eModemSendWaitFlagCustom, 1000, MODEM_OK|MODEM_ERROR);
+    if (stat == 0) return false;
+    
+    snprintf (modem_tx, 50, "AT+SAPBR=1,1\n"); //active bearer
+    stat = Modem_API_SendWait(modem_tx, eModemSendWaitFlagCustom, 1000, MODEM_OK|MODEM_ERROR);
+    if (stat == 0) return false;
+
+    snprintf (modem_tx, 50, "AT+CNTPCID=1\n"); //set gprs bearer id 
+    stat = Modem_API_SendWait(modem_tx, eModemSendWaitFlagCustom, 1000, MODEM_OK|MODEM_ERROR);
+    if (stat == 0) return false;
+
+    snprintf (modem_tx, 50, "AT+CNTP\n");  //synchronize clock
+    stat = Modem_API_SendWait(modem_tx, eModemSendWaitFlagCustom, 1000, MODEM_OK|MODEM_ERROR);
+    if (stat == 0) return false;
+
+    snprintf (modem_tx, 50, "AT+CGNSSAV=3,3\n"); //http save epo 
+    stat = Modem_API_SendWait(modem_tx, eModemSendWaitFlagCustom, 1000, MODEM_OK|MODEM_ERROR);
+    if (stat == 0) return false;
+
+    snprintf (modem_tx, 50, "AT+HTTPINIT\n"); //init http service
+    stat = Modem_API_SendWait(modem_tx, eModemSendWaitFlagCustom, 1000, MODEM_OK|MODEM_ERROR);
+    if (stat == 0) return false;
+
+    snprintf (modem_tx, 50, "AT+HTTPPARA=\"CID\",1\n"); //cid profile 
+    stat = Modem_API_SendWait(modem_tx, eModemSendWaitFlagCustom, 1000, MODEM_OK|MODEM_ERROR);
+    if (stat == 0) return false;
+
+    snprintf (modem_tx, 100, "AT+HTTPPARA=\"URL\",%s\n", EPO_DOWNLOAD_LINK); //set download link 
+    stat = Modem_API_SendWait(modem_tx, eModemSendWaitFlagCustom, 1000, MODEM_OK|MODEM_ERROR);
+    if (stat == 0) return false;
+
+    snprintf (modem_tx, 50, "AT+HTTPACTION=0\n");  // start download
+    stat = Modem_API_SendWait(modem_tx, eModemSendWaitFlagCustom, 1000, MODEM_OK|MODEM_ERROR);
+    if (stat == 0) return false;
 
     return true;
 }
 
 
-bool Modem_API_SendWait(char * params, eModemSendWait modem_wait, ...){
+
+bool Modem_API_ReadSMS(char *params){ 
+	char id[3] = {0};
+	char modem_tx[30] = {0};
+	uint8_t id_index = 0;
+
+	for (uint8_t start = 0, i = 0; i < 5 ; i++){
+		if ((params[i] >= '0') && (params[i] <= '9')){
+			if (start == 0) start = 1;
+			id[id_index++] = params[i];
+		} else {
+			if (start == 1) break;
+			if (i == 4) return false;
+		}
+	}
+
+	if (id_index == 0) return false;
+
+	snprintf(modem_tx, 30, "AT+CMGF=1\n");
+	Modem_API_SendWait(modem_tx, eModemSendWaitFlagCustom, 1000, MODEM_OK|MODEM_ERROR);
+
+	snprintf(modem_tx, 30, "AT+CMGR=%s\n", id);
+	Modem_API_SendWait(modem_tx, eModemSendWaitNo);
+
+    return true;
+}
+
+bool Modem_API_DeleteSMS(char *params){
+    char temp[5]; 
+    uint8_t length = Modem_API_ParseToSymbol((params), temp, '\n');
+    if (length == 1) length = temp[0] - '0';
+    else if (length == 2) length = 10*(temp[0] - '0') + (temp[1] - '0');
+    else if (length == 3) length = 100*(temp[0] - '0') + 10*(temp[1] - '0') + (temp[2] - '0');
+    else return false;
+    
+    char modem_tx[20]={0};
+    if (length == 255) snprintf(modem_tx, 20, "AT+CMGD=%d,%d\n",1, 4);
+    else snprintf(modem_tx, 20, "AT+CMGD=%d\n", length);
+    Modem_API_SendWait(modem_tx, eModemSendWaitFlagCustom, 1000, MODEM_OK | MODEM_ERROR );
+    return true;
+}
+
+
+bool Modem_API_SendLocation(char *params){ 
+    char temp[5];
+    char message_text[100]={0};
+    uint8_t length = Modem_API_ParseToSymbol((params), temp, '\n');
+    if (length == 1) length = temp[0] - '0';
+    else if (length == 2) length = 10*(temp[0] - '0') + (temp[1] - '0');
+    else return false;
+    snprintf(message_text, 100, "https://google.com/maps/place/%s,%s", latitude, longitude);
+    
+    
+    
+    sCommandParameters_t *cmd = NULL;  //module, function number, params parsed from uart data
+	cmd = calloc(1, sizeof(sCommandParameters_t));
+	cmd -> params = calloc(100, sizeof(char));
+	cmd -> module = eCommandModulesModem;
+	cmd -> command = eModemCommandsSendSMS;
+	snprintf(cmd -> params, 100, "%s,%s\n", allowed_contacts[length-1] , message_text);
+	CMD_API_PuttoQueue(&cmd);
+
+}
+
+
+
+
+
+
+
+
+
+//--------------------------------------------------------------------------
+
+//MODEM AT COMMANDS RESPONSE FUNCTIONS (WHEN MODEM SENDS ANSWERS): 
+
+bool Modem_API_AT_Response_CGNSCHK(char *params){
+    char temp[10]={0};
+    uint8_t i=1;
+    uint8_t length=0;
+
+    /*should send something like this 3,1,27456,xx  3 is to indicate epo
+     1 is epo exists 0 doesnt exists, next is size last one is available hours*/
+    //epo file parse
+    length = Modem_API_ParseToSymbol((params+i), temp, ',');
+    if (temp[0]-'0' != 3){
+    	epo_file_status = 0;
+    	return false; // somethings wrong no file
+    }
+    Modem_API_CleanBuffer((uint8_t*)temp, 10);
+    i+=length+1;
+
+
+    //exist or not
+    length = Modem_API_ParseToSymbol((params+i), temp, ',');
+    if (temp[0]-'0' != 1){
+        epo_file_status = 0;
+        return true; // no epo file, need to download
+    }
+    Modem_API_CleanBuffer((uint8_t*)temp, 10);
+    i+=length+1;
+
+    //size - doesnt matter
+    length = Modem_API_ParseToSymbol((params+i), temp, ',');
+    Modem_API_CleanBuffer((uint8_t*)temp, 10);
+
+    length = Modem_API_ParseToSymbol((params+i), temp, ',');
+    (temp[0] > '0') ?  (temp[0]-='0') : (temp[0] = 0);
+    (temp[1] > '0') ?  (temp[1]-='0') : (temp[1] = 0);
+    uint8_t hours = temp[0]*10+temp[1];
+    if (hours != 0){
+    	epo_file_status = 0;
+    	epo_file_status |= (hours<<8);
+    	epo_file_status |= 1U;
+    } else  {
+    	epo_file_status = 0;
+    }
+    return true; 
+}
+
+
+bool Modem_API_AT_Response_CGNSINF(char*params){
+	char temp[20] = {0};
+	uint8_t i=1;
+	uint8_t length=0;
+	length = Modem_API_ParseToSymbol((params+i), temp, ',');
+    if (length == 255) return true;
+	i+=length+1;
+    Modem_API_CleanBuffer((uint8_t*)temp, 20);
+	length = Modem_API_ParseToSymbol((params+i), temp, ',');
+    if (length == 255) return true;
+    if (temp[0] == '0'){
+    	gnss_status &= ~GNSS_FIX_COMPLETE;//clear gnss  fix flag
+    } else {
+    	gnss_status |= GNSS_FIX_COMPLETE; //add gnss fix flag
+    }
+
+
+    if(
+        (
+    		((gnss_status & GNSS_FIX_COMPLETE) == 0)
+    	    &&((pet_tracker_options & GNSS_FULL_PARSE) != 0)
+		)	//no fix but full parse etc.
+    	||((gnss_status & GNSS_FIX_COMPLETE) != 0)
+    ){
+
+		i+=length+1;
+		Modem_API_CleanBuffer((uint8_t*)temp, 20);
+		length = Modem_API_ParseToSymbol((params+i), temp, ',');
+		if (length == 255) return true;
+		i+=length+1;
+
+		Modem_API_CleanBuffer((uint8_t*)temp, 20);
+		length = Modem_API_ParseToSymbol((params+i), temp, ',');
+		if (length == 255) return true;
+		snprintf(latitude, length, temp);
+		i+=length+1;
+ 		Modem_API_CleanBuffer((uint8_t*)temp, 20);
+		length = Modem_API_ParseToSymbol((params+i), temp, ',');
+		if (length == 255) return true;
+		snprintf(longitude, length, temp);
+    }
+
+	return true;
+}
+
+
+bool Modem_API_AT_Response_HTTPACTION(){ 
+    char modem_tx[100];
+    uint32_t stat;
+    Modem_API_CheckEpo(NULL);  //refresh epo flags
+    snprintf (modem_tx, 50, "AT+HTTPTERM\n");  //terminate http 
+    stat = Modem_API_SendWait(modem_tx, eModemSendWaitFlagCustom, 1000, MODEM_OK|MODEM_ERROR);
+    if (stat == 0) return false;
+    else return true;
+}
+
+
+bool Modem_API_AT_Response_CMTI(char *params){ 
+	uint8_t sms_id = 0;
+	char sms[5]={0};
+	uint8_t sms_index = 0;
+
+
+	for (uint8_t start = 0, i=0; i<20 ; i++){
+		if ((params[i] >= '0') && (params[i] <= '9')){
+			if (start == 0) start = 1;
+			sms[sms_index++] = params[i];
+		} else {
+			if (start == 1) break;
+		}
+	}
+
+	if (sms_index == 1) sms_id = (sms[0] - '0');
+	if (sms_index == 2) sms_id = (((sms[0] - '0')*10) + (sms[1] - '0'));
+
+
+
+    sCommandParameters_t *read = NULL;  //module, function number, params parsed from uart data
+    read = calloc(1, sizeof(sCommandParameters_t));
+	read -> params = calloc(50, sizeof(char));
+    read -> module = eCommandModulesModem; 
+    read -> command = eModemCommandsReadSMS; 
+    snprintf(read -> params, 10, "%d\n", sms_id);
+    CMD_API_PuttoQueue(&read);
+	return true;
+}
+
+
+bool Modem_API_AT_Response_CMGR(char *params){
+
+    pet_tracker_status |= WAITING_FOR_MESSAGE; 
+
+    return true;
+}
+
+
+bool Modem_API_AT_Response_NotParsed(char *params){
+    if ((pet_tracker_status & WAITING_FOR_MESSAGE) != 0) {
+        char *command = calloc(100, sizeof(char));
+        for (int i = 0; i < 100 ; i++){
+        	if (params[i] != 0){
+        		command[i] = params[i];
+        	} else{
+        		command[i]='\n';
+        		break;
+        	}
+        }
+        UART_API_PutToQueue(eUartDebug, command);
+        pet_tracker_status &= ~WAITING_FOR_MESSAGE;
+    }
+
+
+	return true;
+}
+
+
+
+//UTILITY-----------------------------------------------------------------------
+
+uint32_t Modem_API_SendWait(char * params, eModemSendWait modem_wait, ...){
     uint32_t wait_time =  0xFFFFFFFF; 
     uint32_t wait_flag =  0xFFFFFFFF;
     uint32_t got_flag;
@@ -300,7 +722,7 @@ bool Modem_API_SendWait(char * params, eModemSendWait modem_wait, ...){
     }
     va_end(arg_list);
     if (osMutexAcquire(modem_mutex_id, 0) != osOK){
-        return false; //mutex is not free
+        return 0; //mutex is not free
     } else {
         if ((modem_wait == eModemSendWaitFlagCustom) 
             ||(modem_wait == eModemSendWaitFlagForever)){
@@ -310,58 +732,49 @@ bool Modem_API_SendWait(char * params, eModemSendWait modem_wait, ...){
         switch (modem_wait) {
         	case eModemSendWaitNo: {
         		osMutexRelease(modem_mutex_id);
-        		return true;
+        		return 0;
         	}
         	case eModemSendWaitCustom: {
         		osDelay(wait_time);
         		osMutexRelease(modem_mutex_id);
-        		return true;
+        		return 0;
         	}
         	case eModemSendWaitFlagCustom:
         	case eModemSendWaitFlagForever:{
-				got_flag = osEventFlagsWait(modem_flags, wait_flag, osFlagsWaitAll, wait_time);
+				got_flag = osEventFlagsWait(modem_flags, wait_flag, osFlagsWaitAny, wait_time);
         		osMutexRelease(modem_mutex_id);
-        		if ((got_flag & wait_flag) == wait_flag){
-        			return true;
-        		} else {
-        			return false;
-        		}
+        		return (got_flag != osFlagsErrorTimeout) ? got_flag : 0;
         	}
         	default: {
         		osMutexRelease(modem_mutex_id);
-        		return false;
+        		return 0;
         	}
         }
     }
-    return true; 
+    return 0; 
 }
 
 
-
-
-bool Modem_API_GNSS_Power(char *params){
-    uint8_t i=0;
-    while (1) { 
-        if (params[i]==0 || params[i]=='\n') return false; //no data
-        if (params[i]-48 == 1 || params[i]-48 == 0) i = params[i] - 48;  //extract 1 or 0 
-    }
-    char modem_tx[20]={0};
-    strncpy(modem_tx, "AT+CGNSPWR=%d\n", i);
-    return true;
+uint8_t Modem_API_ParseToSymbol(char *text, char *parsed, char symbol) {
+	uint8_t length = 0;
+	uint8_t start = 0;
+	for (int i = 0; i<255; i++){
+		if ((text[i] >= '0' && text[i] <= '9') || text[i] == '.' || text[i] == '\r') {
+			if (start == 0) start = 1; //number start
+			if (text[i] != 13) parsed[length++] = text[i];
+		} else if ((text[i] == symbol)) break; //number parsed succesfully
+		else if (start == 1) return 0xFF; //number is split or something wrong
+	}
+	return length;
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
+bool Modem_API_CleanBuffer(uint8_t *buf, uint16_t len) {
+	for (uint8_t i = 0; i<len; i++){
+		buf[i] = 0;
+	}
+	return true;
+}
 
 
 

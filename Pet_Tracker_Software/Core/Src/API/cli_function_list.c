@@ -23,6 +23,12 @@ const sCommandFunctions_t modem_command_function_lut[eModemCommandsLast] = {
 	[eModemCommandsSendCommand] = {.name = "SEND",			.function_pointer = &Modem_API_SendCommand},
 	[eModemCommandsGNSSPower]	= {.name = "GNSSPOWER", 	.function_pointer = &Modem_API_GNSS_Power},
 	[eModemCommandsSendSMS]		= {.name = "SMS", 			.function_pointer = &Modem_API_SendSMS},
+	[eModemCommandsDownloadEPO] = {.name = "DOWNLOADEPO",   .function_pointer = &Modem_API_DownloadEPO},
+	[eModemCommandsCheckEPO]	= {.name = "CHECKEPO", 		.function_pointer = &Modem_API_CheckEpo}, 
+	[eModemCommandsReadSMS]		= {.name = "READSMS", 		.function_pointer = &Modem_API_ReadSMS},
+	[eModemCommandsDeleteSMS]	= {.name = "DELETESMS",     .function_pointer = &Modem_API_DeleteSMS},
+	[eModemCommandsGetLocation] = {.name = "GETLOCATION",   .function_pointer = &Modem_API_GetLocation},
+	[eModemCommandSendLocation]	= {.name = "SENDLOCATION",  .function_pointer = &Modem_API_SendLocation}
 };
 const sCommandFunctions_t led_command_function_lut[eLEDCommandsLast]={
 	[eLEDCommandsFirst]	= {.name = "A", .function_pointer = NULL}
@@ -32,7 +38,6 @@ const sCommandFunctions_t pcuart_command_function_lut[ePCUARTCommandsLast]={
 };
 const sCommandFunctions_t power_command_function_lut[ePowerCommandsLast]={
 	[ePowerCommands4VPower]		= {.name = "4VPOWER", .function_pointer =&POWER_API_4VPower},
-	[ePowerCommandsGNSSPower]	= {.name = "GNSSPOWER", .function_pointer =&POWER_API_GNSSPower},
 	[ePowerCommandsLEDPower]	= {.name = "LEDPOWER", .function_pointer =&POWER_API_LEDPower},
 	[ePowerCommandsModemPower]	= {.name = "GSMPOWER", .function_pointer =&POWER_API_ModemPower}
 };

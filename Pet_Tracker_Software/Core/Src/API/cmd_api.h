@@ -35,6 +35,6 @@ typedef struct sCommandParameters_t {
 bool CMD_API_ThreadInit (void);
 bool CMD_API_GetFromQueue (sCommandParameters_t **command, uint32_t wait_time);
 bool CMD_API_AddCommandToQueue(sCommandParameters_t *comand);
-
+bool CMD_API_PuttoQueue (sCommandParameters_t *command);
 
 #endif /* __CMD_APP__H__ */

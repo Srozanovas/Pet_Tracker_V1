@@ -235,8 +235,9 @@ bool UART_Driver_Send_String (eUart_t uart, uint8_t *uart_tx, uint16_t size) {  
     uint8_t tx_size;
     for (tx_size=0; (tx_size<UART_TX_MAX) && (tx_size < size); tx_size ++){
     	if (*(uart_tx+tx_size) == 0) break;
+    	HAL_UART_Transmit(&uart_desc_lut_dynamic[uart].uart_handle, (uart_tx+tx_size), 1, 10);
     }
-	HAL_UART_Transmit(&uart_desc_lut_dynamic[uart].uart_handle, uart_tx, tx_size, 50);
+
     return true;
 }
 

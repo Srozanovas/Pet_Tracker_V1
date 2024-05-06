@@ -106,14 +106,8 @@ bool GPIO_Driver_Init (eGpioPin_t gpio_pin, eGpioPinState_t init_state) {  //GPI
     }
 
     //GPIO STRUCT FORMATION
-    if (init_state == ePinHigh){
-        HAL_GPIO_WritePin(gpio_desc_lut[gpio_pin].port, gpio_desc_lut[gpio_pin].pin, GPIO_PIN_SET);
-        gpio_pin_level_status |= (1U<<gpio_pin); // set 1 in pin place
-    } 
-    else {
-        HAL_GPIO_WritePin(gpio_desc_lut[gpio_pin].port, gpio_desc_lut[gpio_pin].pin, GPIO_PIN_RESET);
-        gpio_pin_level_status &= ~(1U<<gpio_pin); // set 0 in pin place
-    }
+
+    HAL_GPIO_WritePin(gpio_desc_lut[gpio_pin].port, gpio_desc_lut[gpio_pin].pin, GPIO_PIN_RESET);
     gpio_init_struct.Pin = gpio_desc_lut[gpio_pin].pin;
     gpio_init_struct.Mode = gpio_desc_lut[gpio_pin].mode;
     gpio_init_struct.Speed = gpio_desc_lut[gpio_pin].speed;
@@ -126,7 +120,17 @@ bool GPIO_Driver_Init (eGpioPin_t gpio_pin, eGpioPinState_t init_state) {  //GPI
         HAL_NVIC_SetPriority(gpio_desc_lut[gpio_pin].interupt, 5, 0);
         HAL_NVIC_EnableIRQ(gpio_desc_lut[gpio_pin].interupt);
     }
+
     gpio_init_status |= 1u<<((uint8_t)gpio_pin); 
+
+    if (init_state == ePinHigh){
+            HAL_GPIO_WritePin(gpio_desc_lut[gpio_pin].port, gpio_desc_lut[gpio_pin].pin, GPIO_PIN_SET);
+            gpio_pin_level_status |= (1U<<gpio_pin); // set 1 in pin place
+        }
+        else {
+            HAL_GPIO_WritePin(gpio_desc_lut[gpio_pin].port, gpio_desc_lut[gpio_pin].pin, GPIO_PIN_RESET);
+            gpio_pin_level_status &= ~(1U<<gpio_pin); // set 0 in pin place
+        }
     return true;
 }
 

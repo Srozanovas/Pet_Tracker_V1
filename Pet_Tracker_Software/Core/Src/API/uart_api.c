@@ -254,7 +254,21 @@ bool UART_API_SetFlag (eUart_t uart) {
     return true;
 }
 
+bool UART_API_PutToQueue(eUart_t uart, char *data){ 
+    sUartData_t *put = calloc(1, sizeof(sUartData_t)); 
+    put->buffer_adress = (uint8_t*) calloc(250, sizeof(uint8_t));
 
+    strncpy(put->buffer_adress, data, 250);
+
+    if (uart == eUartModem){
+        if (osMessageQueuePut(modem_data_queue_id, &uart_data, osPriorityHigh, UART_QUEUE_PUT_TIMEOUT) != osOK) {}
+    } else if (osMessageQueuePut(command_data_queue_id, &uart_data, osPriorityHigh, UART_QUEUE_PUT_TIMEOUT) != osOK) {}
+    else { 
+        free(put->buffer_adress); 
+        free(put);
+    }
+    
+}
 
 
 /**********************************************************************************************************************

@@ -30,7 +30,7 @@ sUartData_t uart_data_unproccessed = {0}; //data from uart
 
 
 typedef struct sCommandParserTempString{ 
-    char text[50]; 
+    char text[100];
     int  index;
 } sCommandParserTempString; 
 sCommandParserTempString TEMP; //temp string buffer when parsing data
@@ -177,9 +177,9 @@ bool CMD_API_CommandParser(sCommandParameters_t*  parse_command, sUartData_t * u
     if (no_params == 0){
         while (1){
             TEMP.text[TEMP.index] = *(uart_data->buffer_adress+i);
-            if((TEMP.text[TEMP.index] == 0) || (TEMP.index == 50)) return false;
+            if((TEMP.text[TEMP.index] == 0) || (TEMP.index ==100)) return false;
             else if (TEMP.text[TEMP.index] == '\n'){
-                strncpy(parse_command ->params, TEMP.text, 50);
+                strncpy(parse_command ->params, TEMP.text,100);
                 break;
             } else {
             	i++;
@@ -251,4 +251,11 @@ bool CMD_API_GetFromQueue (sCommandParameters_t **command, uint32_t wait_time) {
         return false;
    }
     return true;
+}
+
+
+
+bool CMD_API_PuttoQueue (sCommandParameters_t *command){ 
+    osMessageQueuePut(commands_queue_id, command, osPriorityHigh, COMMANDS_QUEUE_PUT_TIMEOUT);
+    return true; 
 }
