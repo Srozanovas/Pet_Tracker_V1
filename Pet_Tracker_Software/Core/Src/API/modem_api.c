@@ -7,6 +7,7 @@
 #include "cmd_api.h"
 #include "stdarg.h"
 #include "cli_function_list.h"
+#include "eeprom_api.h"
 
 
 #define MODEM_WAIT_FOR_SMS 	(1U<<0)
@@ -31,6 +32,7 @@ typedef enum eModemATCommandAnswer {
 	eModemATPSUTTZ,
 	eModemATDST,
 	eModemATNotParsed,
+    eModemATCCLK,
     eModemATLast, 
 } eModemATCommandAnswer;
 const char modem_commands_lut[eModemATLast][20] = { 
@@ -47,7 +49,8 @@ const char modem_commands_lut[eModemATLast][20] = {
     [eModemATCMTI]      = "+CMTI:",
     [eModemATHTTPACTION]= "+HTTPACTION:",
 	[eModemATPSUTTZ]	= "*PSUTTZ:",
-	[eModemATDST]		= "DST:"
+	[eModemATDST]		= "DST:",
+    [eModemATCCLK]      = "+CCLK:"
 }; 
 
 
@@ -100,6 +103,7 @@ bool Modem_API_AT_Response_HTTPACTION();
 bool Modem_API_AT_Response_CMTI(char *params);
 bool Modem_API_AT_Response_CMGR(char *params);
 bool Modem_API_AT_Response_NotParsed(char *params);
+bool Modem_API_AT_Response_CCLK(char *params);
 
 //RTOS FUNCTIONS 
 bool Modem_API_Init(){ 
@@ -279,6 +283,10 @@ void Modem_API_AnswerThread(){
                 case eModemATLast:{
                     break;
                 } 
+                case eModemATCCLK: { 
+                    Modem_API_AT_Response_CCLK(parsed_message->command_answer); 
+                    break;
+                }
                 default: break;  
             }
             free(parsed_message->command_answer); 
@@ -298,7 +306,18 @@ bool Modem_API_GetLocation(char *params){
 	char modem_tx[20];
 	snprintf(modem_tx,20,"AT+CGNSINF\n");
 	Modem_API_SendWait(modem_tx, eModemSendWaitFlagCustom, 1000, MODEM_OK|MODEM_ERROR);
+    if (gnss_status & GNSS_FIX_COMPLETE != 0){ 
+        snprintf(modem_tx,20,"AT+CCLK?\n");
+        Modem_API_SendWait(modem_tx, eModemSendWaitFlagCustom, 1000, MODEM_OK|MODEM_ERROR);
+        if (num_of_fixes == 100) num_of_fixes = 0;
 
+        EEPROM_API_SendBuffer(eEepromAT24C256A1, num_of_fixes*33, latitude, 8);
+        EEPROM_API_SendBuffer(eEepromAT24C256A1, num_of_fixes*33+8, longitude, 8);
+        EEPROM_API_SendBuffer(eEepromAT24C256A1, num_of_fixes*33+16, time_of_fix, 17);
+        num_of_fixes++;
+        EEPROM_API_SendByte(eEepromAT24C256A1, EE_LAST_FIX, num_of_fixes);
+        gnss_status &= ~GNSS_FIX_COMPLETE;
+    }
 	return true;
 }
 
@@ -513,17 +532,13 @@ bool Modem_API_SendLocation(char *params){
     if (length == 1) length = temp[0] - '0';
     else if (length == 2) length = 10*(temp[0] - '0') + (temp[1] - '0');
     else return false;
-    snprintf(message_text, 100, "https://google.com/maps/place/%s,%s", latitude, longitude);
+    snprintf(message_text, 100, "Time:%s Place:https://google.com/maps/place/%s,%s", time_of_fix, latitude, longitude);
     
     
-    
-    sCommandParameters_t *cmd = NULL;  //module, function number, params parsed from uart data
-	cmd = calloc(1, sizeof(sCommandParameters_t));
-	cmd -> params = calloc(100, sizeof(char));
-	cmd -> module = eCommandModulesModem;
-	cmd -> command = eModemCommandsSendSMS;
-	snprintf(cmd -> params, 100, "%s,%s\n", allowed_contacts[length-1] , message_text);
-	CMD_API_PuttoQueue(&cmd);
+    char *command = calloc(100, sizeof(char));
+	snprintf(command, 100, "%s,%s\n", allowed_contacts[length-1] , message_text);
+	CMD_API_PuttoQueue(eCommandModulesModem, eModemCommandsSendSMS, command, 100);
+    free(command);
 
 }
 
@@ -599,8 +614,6 @@ bool Modem_API_AT_Response_CGNSINF(char*params){
     } else {
     	gnss_status |= GNSS_FIX_COMPLETE; //add gnss fix flag
     }
-
-
     if(
         (
     		((gnss_status & GNSS_FIX_COMPLETE) == 0)
@@ -661,13 +674,9 @@ bool Modem_API_AT_Response_CMTI(char *params){
 
 
 
-    sCommandParameters_t *read = NULL;  //module, function number, params parsed from uart data
-    read = calloc(1, sizeof(sCommandParameters_t));
-	read -> params = calloc(50, sizeof(char));
-    read -> module = eCommandModulesModem; 
-    read -> command = eModemCommandsReadSMS; 
-    snprintf(read -> params, 10, "%d\n", sms_id);
-    CMD_API_PuttoQueue(&read);
+    char *command = calloc(20, sizeof(char));
+    CMD_API_PuttoQueue(eCommandModulesModem,eModemCommandsReadSMS, command, 20);
+    free (command);
 	return true;
 }
 
@@ -699,6 +708,10 @@ bool Modem_API_AT_Response_NotParsed(char *params){
 	return true;
 }
 
+bool Modem_API_AT_Response_CCLK(char *params){ 
+    snprintf(time_of_fix, 18, params+2);
+    return true;
+}
 
 
 //UTILITY-----------------------------------------------------------------------
@@ -775,7 +788,6 @@ bool Modem_API_CleanBuffer(uint8_t *buf, uint16_t len) {
 	}
 	return true;
 }
-
 
 
 

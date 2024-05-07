@@ -40,6 +40,13 @@ bool EEPROM_API_SendBuffer(eEeprom_t eeprom_id, uint16_t adress, uint8_t *byte, 
     return true;
 } 
 
+bool EEPROM_API_EraseSector(eEeprom_t eeprom_id, uint16_t start_adress, uint16_t finish_adress){ 
+
+    for (int i = start_adress; i<=finish_adress; i++){ 
+        EEPROM_API_SendByte(eeprom_id, i, 0xFF);
+    }
+    return true;
+}
 
 bool EEPROM_API_ReadBuffer(eEeprom_t eeprom_id, uint16_t adress, uint8_t *byte, uint8_t size){
     

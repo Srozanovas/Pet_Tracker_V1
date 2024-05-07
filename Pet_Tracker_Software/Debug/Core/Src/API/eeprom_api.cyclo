@@ -2,4 +2,5 @@
 ../Core/Src/API/eeprom_api.c:25:6:EEPROM_API_SendByte	1
 ../Core/Src/API/eeprom_api.c:30:6:EEPROM_API_ReadByte	1
 ../Core/Src/API/eeprom_api.c:35:6:EEPROM_API_SendBuffer	2
-../Core/Src/API/eeprom_api.c:44:6:EEPROM_API_ReadBuffer	2
+../Core/Src/API/eeprom_api.c:43:6:EEPROM_API_EraseSector	2
+../Core/Src/API/eeprom_api.c:51:6:EEPROM_API_ReadBuffer	2

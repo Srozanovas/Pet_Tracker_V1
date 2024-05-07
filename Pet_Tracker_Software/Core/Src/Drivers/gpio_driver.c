@@ -11,6 +11,7 @@
 #define RTC_B_CLOCK_ENABLED (1<<1)
 #define RTC_C_CLOCK_ENABLED (1<<2)
 uint8_t rtc_clock_enabled = 0; 
+bool (*acce_set_flag)(uint8_t flag);
 
 
 typedef struct sGpioDesc_t {
@@ -27,7 +28,7 @@ typedef struct sGpioDesc_t {
 
 const static sGpioDesc_t gpio_desc_lut[] = {
     //GPIOA______________________________________________________________________________________________________________________________________________________________________________________________________________________________________
-    [eGpioPinA1AcceInt]     = {.port = GPIOA, .pin = GPIO_PIN_1,    .mode = GPIO_MODE_IT_FALLING,   .speed = GPIO_SPEED_FREQ_LOW,       .pull = GPIO_PULLUP, .alternate = 0,                .interupt_enable = true,    .interupt=EXTI1_IRQn    },
+    [eGpioPinA1AcceInt]     = {.port = GPIOA, .pin = GPIO_PIN_1,    .mode = GPIO_MODE_IT_RISING,   	.speed = GPIO_SPEED_FREQ_LOW,       .pull = GPIO_PULLDOWN,.alternate = 0,                .interupt_enable = true,    .interupt=EXTI1_IRQn    },
     [eGpioPinA2UART2TX]     = {.port = GPIOA, .pin = GPIO_PIN_2,    .mode = GPIO_MODE_AF_PP,        .speed = GPIO_SPEED_FREQ_VERY_HIGH, .pull = GPIO_NOPULL, .alternate = GPIO_AF7_USART2,  .interupt_enable = false,   .interupt=0xFF          },
     [eGpioPinA3UART2RX]     = {.port = GPIOA, .pin = GPIO_PIN_3,    .mode = GPIO_MODE_AF_PP,        .speed = GPIO_SPEED_FREQ_VERY_HIGH, .pull = GPIO_NOPULL, .alternate = GPIO_AF7_USART2,  .interupt_enable = false,   .interupt=0xFF          },
     [eGpioPinA4]            = {.port = GPIOA, .pin = GPIO_PIN_4,    .mode = GPIO_MODE_OUTPUT_PP,    .speed = GPIO_SPEED_FREQ_LOW,       .pull = GPIO_NOPULL, .alternate = 0,                .interupt_enable = false,   .interupt=0xFF          },
@@ -106,8 +107,8 @@ bool GPIO_Driver_Init (eGpioPin_t gpio_pin, eGpioPinState_t init_state) {  //GPI
     }
 
     //GPIO STRUCT FORMATION
-
-    HAL_GPIO_WritePin(gpio_desc_lut[gpio_pin].port, gpio_desc_lut[gpio_pin].pin, GPIO_PIN_RESET);
+    if (gpio_pin != eGpioPinA1AcceInt)HAL_GPIO_WritePin(gpio_desc_lut[gpio_pin].port, gpio_desc_lut[gpio_pin].pin, GPIO_PIN_RESET);
+    
     gpio_init_struct.Pin = gpio_desc_lut[gpio_pin].pin;
     gpio_init_struct.Mode = gpio_desc_lut[gpio_pin].mode;
     gpio_init_struct.Speed = gpio_desc_lut[gpio_pin].speed;
@@ -124,13 +125,12 @@ bool GPIO_Driver_Init (eGpioPin_t gpio_pin, eGpioPinState_t init_state) {  //GPI
     gpio_init_status |= 1u<<((uint8_t)gpio_pin); 
 
     if (init_state == ePinHigh){
-            HAL_GPIO_WritePin(gpio_desc_lut[gpio_pin].port, gpio_desc_lut[gpio_pin].pin, GPIO_PIN_SET);
+            if (gpio_pin != eGpioPinA1AcceInt)HAL_GPIO_WritePin(gpio_desc_lut[gpio_pin].port, gpio_desc_lut[gpio_pin].pin, GPIO_PIN_SET);
             gpio_pin_level_status |= (1U<<gpio_pin); // set 1 in pin place
-        }
-        else {
-            HAL_GPIO_WritePin(gpio_desc_lut[gpio_pin].port, gpio_desc_lut[gpio_pin].pin, GPIO_PIN_RESET);
-            gpio_pin_level_status &= ~(1U<<gpio_pin); // set 0 in pin place
-        }
+    }else {
+        if (gpio_pin != eGpioPinA1AcceInt)HAL_GPIO_WritePin(gpio_desc_lut[gpio_pin].port, gpio_desc_lut[gpio_pin].pin, GPIO_PIN_RESET);
+        gpio_pin_level_status &= ~(1U<<gpio_pin); // set 0 in pin place
+    }
     return true;
 }
 
@@ -200,7 +200,12 @@ bool GPIO_Driver_InitAll (void) {   //INIT ALL PINS
 
 /*____________________INTERUPT HANDLERS_______________________________________*/
 
+bool GPIO_Driver_AcceFlagFunc(bool (*func)(uint8_t flag)){ 
+    acce_set_flag = func;
+}
+
 void EXTI1_IRQHandler(void)
 {
-  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_1);
+    HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_1);
+    if (acce_set_flag != NULL) acce_set_flag(ACCE_DATA_READY);
 }

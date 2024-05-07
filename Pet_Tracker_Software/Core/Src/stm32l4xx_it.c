@@ -187,3 +187,12 @@ void TIM1_UP_TIM16_IRQHandler(void)
 /**
   * @brief This function handles USART1 global interrupt.
   */
+
+
+/**
+  * @brief This function handles USART2 global interrupt.
+  */
+
+/* USER CODE BEGIN 1 */
+
+/* USER CODE END 1 */

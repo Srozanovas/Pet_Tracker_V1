@@ -255,7 +255,13 @@ bool CMD_API_GetFromQueue (sCommandParameters_t **command, uint32_t wait_time) {
 
 
 
-bool CMD_API_PuttoQueue (sCommandParameters_t *command){ 
-    osMessageQueuePut(commands_queue_id, command, osPriorityHigh, COMMANDS_QUEUE_PUT_TIMEOUT);
+bool CMD_API_PuttoQueue (eCommandModules_t module, uint8_t command, char *param, uint8_t param_size){ 
+    sCommandParameters_t *cmd = NULL;  //module, function number, params parsed from uart data
+	cmd = calloc(1, sizeof(sCommandParameters_t));
+	cmd -> params = calloc(100, sizeof(char));
+	cmd -> module = module;
+	cmd -> command = command;
+	snprintf(cmd -> params, param_size, param);
+    osMessageQueuePut(commands_queue_id, &cmd, osPriorityHigh, COMMANDS_QUEUE_PUT_TIMEOUT);
     return true; 
 }

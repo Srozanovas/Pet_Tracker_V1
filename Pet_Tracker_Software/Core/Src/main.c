@@ -6,13 +6,13 @@
 #include "cmd_api.h"
 #include "modem_api.h"
 #include "eeprom_api.h"
-#include "i2c_driver.h"
+#include "accelerometer_api.h"
 #include "cli_function_list.h"
 
 #define  epo_link "http://wepodownload.mediatek.com/EPO_GPS_3_1.DAT"
 
 
-
+uint8_t acce_info = 0;
 uint32_t gpio_init_status = 0;
 uint32_t gpio_pin_level_status = 0;
 uint16_t uart_init_status = 0;
@@ -28,17 +28,20 @@ uint8_t sms_buffer_index = 0;
 char latitude[20]	={0};
 char longitude[20]	={0};
 char time_of_fix[20]={0};
+uint8_t num_of_fixes = 0;
 uint8_t allowed_contacts[10][20]={"+37067852939"};
 
 uint8_t initialization = 1;
 
-
+uint16_t x_axis;
+uint16_t y_axis;
+uint16_t z_axis;
 
 
 osThreadId_t defaultTaskHandle;
 const osThreadAttr_t defaultTask_attributes = {
   .name = "defaultTask",
-  .stack_size = 128 * 4,
+  .stack_size = 2000,
   .priority = (osPriority_t) osPriorityNormal,
 };
 /* Private function prototypes -----------------------------------------------*/
@@ -48,8 +51,12 @@ bool Main_APP_Pet_Tracker_Init(void);
 
 
 bool Pet_Tracker_Read_Options(){
-		//uint8_t eeprom_save[100]={0};    //for hardcoding params into eeprom
-   // uint8_t eeprom_test[100];
+	uint8_t eeprom_save[100]={0};    //for hardcoding params into eeprom
+
+	/*EEPROM_API_SendByte(eEepromAT24C256A1, EE_LAST_FIX, 1);
+	EEPROM_API_SendBuffer(eEepromAT24C256A1, 0, "54.720251", 8);
+	EEPROM_API_SendBuffer(eEepromAT24C256A1, 8, "25.277977", 8);
+	EEPROM_API_SendBuffer(eEepromAT24C256A1, 16, "24/05/06,23:19:06", 17);*/
    // for (int i= 0; i<10; i++){
 	//  snprintf(eeprom_save, 20, allowed_contacts[i]);
 	  //  EEPROM_API_SendBuffer(eEepromAT24C256A0, EE_PET_TRACKER_PHONEBOOK10x20x8B+i*20 , eeprom_save, 20);
@@ -57,11 +64,15 @@ bool Pet_Tracker_Read_Options(){
 
    // }
 
-
+		//EEPROM_API_SendByte(eEepromAT24C256A1, EE_LAST_FIX, 1);
 		uint8_t eeprom_read[50]={0};
 	    EEPROM_API_ReadBuffer(eEepromAT24C256A0, EE_PET_TRACKER_APN_50X8B, pet_tracker_apn, 50);
 	    EEPROM_API_ReadBuffer(eEepromAT24C256A0, EE_PET_TRACKER_OPTIONS_16B, eeprom_read, 2);
 	    pet_tracker_options = (eeprom_read[0]<<8)|eeprom_read[1];
+	    EEPROM_API_ReadByte(eEepromAT24C256A1, EE_LAST_FIX, &num_of_fixes);
+		EEPROM_API_ReadBuffer(eEepromAT24C256A1, (num_of_fixes-1)*33, latitude, 8);
+		EEPROM_API_ReadBuffer(eEepromAT24C256A1, (num_of_fixes-1)*33+8, longitude, 8);
+		EEPROM_API_ReadBuffer(eEepromAT24C256A1, (num_of_fixes-1)*33+16, time_of_fix, 17);
 
 
 
@@ -93,183 +104,99 @@ bool Main_APP_Pet_Tracker_Init(void){
     CLI_APP_Init();
     CMD_API_ThreadInit();
     GPIO_Driver_Init(eGpioPinB0Power4V, ePinLow);
-    //I2C_Driver_Init(eI2CAcce);
-
+    ACC_API_Init(eAccMPU6050);
+    //GPIO_Driver_Init(eGpioPinA1AcceInt, ePinLow);
     return true;
 
 }
 
+void Blinky(){
+	GPIO_Driver_TogglePin(eGpioPinA12LEDsOn);
+			osDelay(200);
+			GPIO_Driver_TogglePin(eGpioPinA12LEDsOn);
+			osDelay(100);
+			GPIO_Driver_TogglePin(eGpioPinA12LEDsOn);
+
+			osDelay(200);
+			GPIO_Driver_TogglePin(eGpioPinA12LEDsOn);
+			osDelay(100);
+			GPIO_Driver_TogglePin(eGpioPinA12LEDsOn);
+
+
+			osDelay(200);
+			GPIO_Driver_TogglePin(eGpioPinA12LEDsOn);
+			osDelay(100);
+			GPIO_Driver_TogglePin(eGpioPinA12LEDsOn);
+
+			osDelay(200);
+
+			GPIO_Driver_TogglePin(eGpioPinA12LEDsOn);
+}
 
 
 
-
+uint8_t acce = 0;
 
 
 void StartDefaultTask(void *argument)
 {
   for(;;)
   {
-	  static sms_send=0;
-	if (initialization == 1){
-		sCommandParameters_t *cmd = NULL;  //module, function number, params parsed from uart data
-		cmd = calloc(1, sizeof(sCommandParameters_t));
-		cmd -> params = calloc(50, sizeof(char));
-		cmd -> module = eCommandModulesPower;
-		cmd -> command = ePowerCommands4VPower;
-		snprintf(cmd -> params, 3, "1\n");
-		CMD_API_PuttoQueue(&cmd);
+
+	uint8_t acce_flag = osEventFlagsGet();
+
+	//   static sms_send=0;
+	//   if (initialization == 1){
 
 
 
+	// 	//I2C_Driver_Read(eI2CAcce, 0xD0, 0x75, 1, &acce, 1);
 
-		Pet_Tracker_Read_Options();
+	// 	CMD_API_PuttoQueue(eCommandModulesPower, (uint8_t)ePowerCommands4VPower, "1\n", 3);
 
-		cmd = calloc(1, sizeof(sCommandParameters_t));
-		cmd -> params = calloc(50, sizeof(char));
-		cmd -> module = eCommandModulesPower;
-		cmd -> command = ePowerCommandsModemPower;
-		snprintf(cmd -> params, 3, "1\n");
-		CMD_API_PuttoQueue(&cmd);
+	// 	Pet_Tracker_Read_Options();
 
+	// 	CMD_API_PuttoQueue(eCommandModulesPower, (uint8_t)ePowerCommandsModemPower, "1\n", 3);
+	// 	osDelay(20000);
 
 
+	// 	Blinky();
 
-		osDelay(20000);
+	// 	CMD_API_PuttoQueue(eCommandModulesModem, (uint8_t)eModemCommandsSendCommand, "AT+CMGF=1\n", 50);
+	// 	osDelay(2000);
 
+	// 	Blinky();
 
+	// 	CMD_API_PuttoQueue(eCommandModulesModem, (uint8_t)eModemCommandsGNSSPower, "1\n", 3);
+	// 	osDelay(15000);
 
-		GPIO_Driver_TogglePin(eGpioPinA12LEDsOn);
-			osDelay(200);
-			GPIO_Driver_TogglePin(eGpioPinA12LEDsOn);
-			osDelay(100);
-			GPIO_Driver_TogglePin(eGpioPinA12LEDsOn);
+	// 	Blinky();
 
+	// 	CMD_API_PuttoQueue(eCommandModulesModem, (uint8_t)eModemCommandsSendSMS, "+37067852939, Irenginys Veikia !\n", 50);
 
-			osDelay(200);
-			GPIO_Driver_TogglePin(eGpioPinA12LEDsOn);
-			osDelay(100);
-			GPIO_Driver_TogglePin(eGpioPinA12LEDsOn);
-
-
-			osDelay(200);
-			GPIO_Driver_TogglePin(eGpioPinA12LEDsOn);
-			osDelay(100);
-			GPIO_Driver_TogglePin(eGpioPinA12LEDsOn);
-
-			osDelay(200);
-
-			GPIO_Driver_TogglePin(eGpioPinA12LEDsOn);
-
-
-
-		cmd = calloc(1, sizeof(sCommandParameters_t));
-		cmd -> params = calloc(50, sizeof(char));
-		cmd -> module = eCommandModulesModem;
-		cmd -> command = eModemCommandsSendCommand;
-		snprintf(cmd -> params, 50, "AT+CMGF=1\n");
-		CMD_API_PuttoQueue(&cmd);
-
-
-		osDelay(2000);
-
-		GPIO_Driver_TogglePin(eGpioPinA12LEDsOn);
-					osDelay(200);
-					GPIO_Driver_TogglePin(eGpioPinA12LEDsOn);
-					osDelay(100);
-					GPIO_Driver_TogglePin(eGpioPinA12LEDsOn);
-
-
-					osDelay(200);
-					GPIO_Driver_TogglePin(eGpioPinA12LEDsOn);
-					osDelay(100);
-					GPIO_Driver_TogglePin(eGpioPinA12LEDsOn);
-
-
-					osDelay(200);
-					GPIO_Driver_TogglePin(eGpioPinA12LEDsOn);
-					osDelay(100);
-					GPIO_Driver_TogglePin(eGpioPinA12LEDsOn);
-
-					osDelay(200);
-
-					GPIO_Driver_TogglePin(eGpioPinA12LEDsOn);
-
-
-
-
-		cmd = calloc(1, sizeof(sCommandParameters_t));
-		cmd -> params = calloc(50, sizeof(char));
-		cmd -> module = eCommandModulesModem;
-		cmd -> command = eModemCommandsGNSSPower;
-		snprintf(cmd -> params, 3, "1\n");
-		CMD_API_PuttoQueue(&cmd);
-
-		osDelay(15000);
-
-		GPIO_Driver_TogglePin(eGpioPinA12LEDsOn);
-					osDelay(200);
-					GPIO_Driver_TogglePin(eGpioPinA12LEDsOn);
-					osDelay(100);
-					GPIO_Driver_TogglePin(eGpioPinA12LEDsOn);
-
-
-					osDelay(200);
-					GPIO_Driver_TogglePin(eGpioPinA12LEDsOn);
-					osDelay(100);
-					GPIO_Driver_TogglePin(eGpioPinA12LEDsOn);
-
-
-					osDelay(200);
-					GPIO_Driver_TogglePin(eGpioPinA12LEDsOn);
-					osDelay(100);
-					GPIO_Driver_TogglePin(eGpioPinA12LEDsOn);
-
-					osDelay(200);
-
-					GPIO_Driver_TogglePin(eGpioPinA12LEDsOn);
-
-
-
-		cmd = calloc(1, sizeof(sCommandParameters_t));
-		cmd -> params = calloc(50, sizeof(char));
-		cmd -> module = eCommandModulesModem;
-		cmd -> command = eModemCommandsSendSMS;
-		snprintf(cmd -> params, 50, "+37067852939, Irenginys Veikia !\n");
-		CMD_API_PuttoQueue(&cmd);
-
-
-		initialization = 0;
-	}
+	// 	initialization = 0;
+	// }
 
 
 
 
 
-	for (int  i = 0; i<5; i++){
-		osDelay(30000);
-  	}
-	sms_send++;
-
-	sCommandParameters_t *cmd = NULL;  //module, function number, params parsed from uart data
-	cmd = calloc(1, sizeof(sCommandParameters_t));
-  	cmd -> params = calloc(50, sizeof(char));
-  	cmd -> module = eCommandModulesModem;
-  	cmd -> command = eModemCommandsGetLocation;
-  	snprintf(cmd -> params, 3, "1\n");
-  	CMD_API_PuttoQueue(&cmd);
-
-  	osDelay(200);
+	// for (int  i = 0; i<5; i++){
+	// 	osDelay(30000);
+  	// }
+	// sms_send++;
 
 
-  	if(sms_send == 2){
-  		cmd = calloc(1, sizeof(sCommandParameters_t));
-  		  	cmd -> params = calloc(50, sizeof(char));
-  		  	cmd -> module = eCommandModulesModem;
-  		  	cmd -> command = eModemCommandSendLocation;
-  		  	snprintf(cmd -> params, 3, "1\n");
-  		  	CMD_API_PuttoQueue(&cmd);
-  		  	sms_send=0;
-  	}
+  	// CMD_API_PuttoQueue(eCommandModulesModem, eModemCommandsGetLocation, "1\n", 3);
+
+  	// osDelay(200);
+
+
+  	// if(sms_send == 2){
+
+  	// 	  	CMD_API_PuttoQueue(eCommandModulesModem, eModemCommandSendLocation, "1\n", 3 );
+  	// 	  	sms_send=0;
+  	// }
 
 }
 }

@@ -47,7 +47,9 @@ extern uint8_t gnss_status;
 extern char latitude[20];
 extern char longitude[20];
 extern char time_of_fix[20];
+extern uint8_t num_of_fixes;
 extern uint8_t allowed_contacts[10][20];
+extern uint8_t acce_status;
 
 
 #define EPO_DOWNLOAD_LINK "http://wepodownload.mediatek.com/EPO_GPS_3_1.DAT"
@@ -99,7 +101,9 @@ extern uint8_t allowed_contacts[10][20];
 #define FULL_DEBUG      (1U<<2)
 #define GNSS_FULL_PARSE (1U<<3)
 
-
+//ACCE flags
+#define ACCE_ENABLE     (1U<<0)
+#define ACCE_DATA_READY (1U<<1)
 
 //GNSS STATUS FLAGS 
 
