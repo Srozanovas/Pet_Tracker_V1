@@ -30,7 +30,7 @@ char longitude[20]	={0};
 char time_of_fix[20]={0};
 uint8_t num_of_fixes = 0;
 uint8_t allowed_contacts[10][20]={"+37067852939"};
-
+uint8_t acce_status = 0;
 uint8_t initialization = 1;
 
 uint16_t x_axis;
@@ -104,8 +104,8 @@ bool Main_APP_Pet_Tracker_Init(void){
     CLI_APP_Init();
     CMD_API_ThreadInit();
     GPIO_Driver_Init(eGpioPinB0Power4V, ePinLow);
+    acce_status |= ACCE_ENABLE;
     ACC_API_Init(eAccMPU6050);
-    //GPIO_Driver_Init(eGpioPinA1AcceInt, ePinLow);
     return true;
 
 }
@@ -143,7 +143,7 @@ void StartDefaultTask(void *argument)
   for(;;)
   {
 
-	uint8_t acce_flag = osEventFlagsGet();
+
 
 	//   static sms_send=0;
 	//   if (initialization == 1){

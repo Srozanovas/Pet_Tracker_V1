@@ -4,7 +4,7 @@
 
 #include "stdbool.h"
 #include "stdarg.h"
-
+#include "stdint.h"
 
 
 typedef enum eGpioPin_t {
@@ -68,7 +68,7 @@ bool GPIO_Driver_TogglePin (eGpioPin_t gpio_pin);
 bool GPIO_Driver_WritePin (eGpioPin_t gpio_pin, 	eGpioPinState_t pin_state);
 bool GPIO_Driver_ReadPin (eGpioPin_t gpio_pin, 	eGpioPinState_t *pin_status);
 bool GPIO_Driver_InitAll (void);
-
+bool GPIO_Driver_AcceFlagFunc(bool (*func)(uint8_t flag));
 
 
 #endif /* __GPIO_DRIVER__H__ */
