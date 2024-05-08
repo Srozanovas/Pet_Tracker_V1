@@ -50,7 +50,9 @@ extern char time_of_fix[20];
 extern uint8_t num_of_fixes;
 extern uint8_t allowed_contacts[10][20];
 extern uint8_t acce_status;
-
+extern uint8_t acce_options;
+extern float acceleration;
+extern float average_acceleration;
 
 #define EPO_DOWNLOAD_LINK "http://wepodownload.mediatek.com/EPO_GPS_3_1.DAT"
 
@@ -104,6 +106,9 @@ extern uint8_t acce_status;
 //ACCE flags
 #define ACCE_ENABLE     (1U<<0)
 #define ACCE_DATA_READY (1U<<1)
+#define ACCE_CALIBRATED (1U<<2)
+
+#define ACCE_USE_INTERUPT (1U<<0)
 
 //GNSS STATUS FLAGS 
 

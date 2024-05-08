@@ -29,7 +29,7 @@ typedef struct sGpioDesc_t {
 
 const static sGpioDesc_t gpio_desc_lut[] = {
     //GPIOA______________________________________________________________________________________________________________________________________________________________________________________________________________________________________
-    [eGpioPinA1AcceInt]     = {.port = GPIOA, .pin = GPIO_PIN_1,    .mode = GPIO_MODE_IT_RISING,   	.speed = GPIO_SPEED_FREQ_LOW,       .pull = GPIO_PULLDOWN,.alternate = 0,                .interupt_enable = true,    .interupt=EXTI1_IRQn    },
+    [eGpioPinA1AcceInt]     = {.port = GPIOA, .pin = GPIO_PIN_1,    .mode = GPIO_MODE_IT_RISING,   	.speed = GPIO_SPEED_FREQ_LOW,       .pull = GPIO_NOPULL,  .alternate = 0,                .interupt_enable = true,    .interupt=EXTI1_IRQn    },
     [eGpioPinA2UART2TX]     = {.port = GPIOA, .pin = GPIO_PIN_2,    .mode = GPIO_MODE_AF_PP,        .speed = GPIO_SPEED_FREQ_VERY_HIGH, .pull = GPIO_NOPULL, .alternate = GPIO_AF7_USART2,  .interupt_enable = false,   .interupt=0xFF          },
     [eGpioPinA3UART2RX]     = {.port = GPIOA, .pin = GPIO_PIN_3,    .mode = GPIO_MODE_AF_PP,        .speed = GPIO_SPEED_FREQ_VERY_HIGH, .pull = GPIO_NOPULL, .alternate = GPIO_AF7_USART2,  .interupt_enable = false,   .interupt=0xFF          },
     [eGpioPinA4]            = {.port = GPIOA, .pin = GPIO_PIN_4,    .mode = GPIO_MODE_OUTPUT_PP,    .speed = GPIO_SPEED_FREQ_LOW,       .pull = GPIO_NOPULL, .alternate = 0,                .interupt_enable = false,   .interupt=0xFF          },
@@ -41,7 +41,7 @@ const static sGpioDesc_t gpio_desc_lut[] = {
     [eGpioPinA11]           = {.port = GPIOA, .pin = GPIO_PIN_11,   .mode = GPIO_MODE_OUTPUT_PP,    .speed = GPIO_SPEED_FREQ_LOW,       .pull = GPIO_NOPULL, .alternate = 0,                .interupt_enable = false,   .interupt=0xFF          },
     [eGpioPinA12LEDsOn]     = {.port = GPIOA, .pin = GPIO_PIN_12,   .mode = GPIO_MODE_OUTPUT_PP,    .speed = GPIO_SPEED_FREQ_LOW,       .pull = GPIO_NOPULL, .alternate = 0,                .interupt_enable = false,   .interupt=0xFF          },
     //GPIOB______________________________________________________________________________________________________________________________________________________________________________________________________________________________________
-    [eGpioPinB0Power4V]     = {.port = GPIOB, .pin = GPIO_PIN_0,    .mode = GPIO_MODE_OUTPUT_PP,    .speed = GPIO_SPEED_FREQ_LOW,       .pull = GPIO_NOPULL, .alternate = 0,                .interupt_enable = false,   .interupt=0xFF          },
+    [eGpioPinB0Power4V]     = {.port = GPIOB, .pin = GPIO_PIN_0,    .mode = GPIO_MODE_OUTPUT_PP,    .speed = GPIO_SPEED_FREQ_LOW,       .pull = GPIO_PULLUP, .alternate = 0,                .interupt_enable = false,   .interupt=0xFF          },
     [eGpioPinB1]            = {.port = GPIOB, .pin = GPIO_PIN_1,    .mode = GPIO_MODE_OUTPUT_PP,    .speed = GPIO_SPEED_FREQ_LOW,       .pull = GPIO_NOPULL, .alternate = 0,                .interupt_enable = false,   .interupt=0xFF          },
     [eGpioPinB2]            = {.port = GPIOB, .pin = GPIO_PIN_2,    .mode = GPIO_MODE_OUTPUT_PP,    .speed = GPIO_SPEED_FREQ_LOW,       .pull = GPIO_NOPULL, .alternate = 0,                .interupt_enable = false,   .interupt=0xFF          },
     [eGpioPinB6UART1TX]     = {.port = GPIOB, .pin = GPIO_PIN_6,    .mode = GPIO_MODE_AF_PP,        .speed = GPIO_SPEED_FREQ_VERY_HIGH, .pull = GPIO_NOPULL, .alternate = GPIO_AF7_USART1,  .interupt_enable = false,   .interupt=0xFF          },

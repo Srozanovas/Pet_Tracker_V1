@@ -532,7 +532,7 @@ bool Modem_API_SendLocation(char *params){
     if (length == 1) length = temp[0] - '0';
     else if (length == 2) length = 10*(temp[0] - '0') + (temp[1] - '0');
     else return false;
-    snprintf(message_text, 100, "Time:%s Place:https://google.com/maps/place/%s,%s", time_of_fix, latitude, longitude);
+    snprintf(message_text, 100, "Time:%s Place:https://maps.google.com/maps?q=%s,%s", time_of_fix, latitude, longitude);
     
     
     char *command = calloc(100, sizeof(char));

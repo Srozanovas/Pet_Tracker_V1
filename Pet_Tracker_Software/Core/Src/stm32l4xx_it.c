@@ -91,7 +91,7 @@ void HardFault_Handler(void)
   {
     /* USER CODE BEGIN W1_HardFault_IRQn 0 */
 	  static int i=0;
-	  //i++;
+	  i++;
 	  HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_12);
 	  HAL_Delay(500);
 

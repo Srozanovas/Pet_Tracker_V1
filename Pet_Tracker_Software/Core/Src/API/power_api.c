@@ -34,7 +34,7 @@ bool POWER_API_PinControl(eGpioPin_t gpio_pin, uint8_t power){
             }
             break;
         }
-        case eGpioPinB0Power4V: {
+        case eGpioPinB1: {
             if (power == 0) { //turn off
                 if (GPIO_Driver_WritePin(gpio_pin, ePinLow) != true) return false; 
             } else if (power == 1){ //turn on 
@@ -59,11 +59,11 @@ bool POWER_API_LEDPower(char* params){
 
 bool POWER_API_4VPower(char* params){
 	uint8_t power = POWER_API_ParseLevel(params);
-	if ((gpio_init_status & (1<<eGpioPinB0Power4V)) == 0){ //if not initialized
-        GPIO_Driver_Init(eGpioPinB0Power4V, ePinLow);
-        if ((gpio_init_status & (1<<eGpioPinB0Power4V)) == 0) return false; //didn't initialize 
+	if ((gpio_init_status & (1<<eGpioPinB1)) == 0){ //if not initialized
+        GPIO_Driver_Init(eGpioPinB1, ePinLow);
+        if ((gpio_init_status & (1<<eGpioPinB1)) == 0) return false; //didn't initialize
     }
-    return POWER_API_PinControl(eGpioPinB0Power4V, POWER_API_ParseLevel(params));
+    return POWER_API_PinControl(eGpioPinB1, POWER_API_ParseLevel(params));
 } 
 
 
@@ -72,14 +72,14 @@ bool POWER_API_ModemPower(char *params){
     if(power == 1){ 
     	if ((pet_tracker_status & MODEM_POWER_ON) != 0) return true; //already powered
         //CHECK IF NECESSERY PINS ARE INITIALIZED AND ON: 
-        if ((gpio_pin_level_status & (1<<eGpioPinB0Power4V)) == 0) { 
-            if ((gpio_init_status & (1<<eGpioPinB0Power4V)) == 0) { 
-                GPIO_Driver_Init(eGpioPinB0Power4V, ePinHigh); 
-                if ((gpio_init_status & (1<<eGpioPinB0Power4V)) == 0) return false;
-                if ((gpio_pin_level_status & (1<<eGpioPinB0Power4V)) == 0) return false;
+        if ((gpio_pin_level_status & (1<<eGpioPinB1)) == 0) {
+            if ((gpio_init_status & (1<<eGpioPinB1)) == 0) {
+                GPIO_Driver_Init(eGpioPinB1, ePinHigh);
+                if ((gpio_init_status & (1<<eGpioPinB1)) == 0) return false;
+                if ((gpio_pin_level_status & (1<<eGpioPinB1)) == 0) return false;
            } else {
-                GPIO_Driver_WritePin(eGpioPinB0Power4V, ePinHigh); 
-                if ((gpio_pin_level_status & (1<<eGpioPinB0Power4V)) == 0) return false;
+                GPIO_Driver_WritePin(eGpioPinB1, ePinHigh);
+                if ((gpio_pin_level_status & (1<<eGpioPinB1)) == 0) return false;
            }
         }
         if ((gpio_pin_level_status & (1<<eGpioPinA6GSMPower)) == 0){ 

@@ -27,7 +27,6 @@
 
 
 
-#define ACCE_DATA_READY 0b01
 
 static sAccDesc_t acc_desc_lut[] = {
     [eAccMPU6050] = {
@@ -99,12 +98,13 @@ osEventFlagsId_t acce_flags = NULL;
 
 // //Accelerometer data
 static uint8_t accelerometer_data[6];
-float acceleration = 0;
+float Raw;
 
 //acceleration buffer
 float acceleration_buf = 0;
 uint16_t measures = 0;
-float average_acceleration;
+
+uint8_t data;
 // uint16_t temp_acc;
 // float final;
  
@@ -112,11 +112,10 @@ void ACC_API_Thread (void *arguments);
 bool ACC_API_WaitFlag ();
 bool ACC_API_ReadAllAcceleration ();
 bool ACC_API_KalmanFiltering();
-+
+bool ACC_API_Suspend();
 
 
 bool ACC_API_Init (eAcc_t acc_id) {
-    uint8_t data = 0;
     acce_thread_id = osThreadNew(ACC_API_Thread, NULL, &acce_api_thread_atr);
     if (acce_thread_id == NULL) {
        return false;
@@ -162,7 +161,7 @@ bool ACC_API_KalmanFiltering(){
     static float Xaxis_conv_sum = 0;
     static float Yaxis_conv_sum = 0;
     static float Zaxis_conv_sum = 0;
-    static config_flag = 0; 
+
     //parse axis meassurements 
     axies_desc_lut[eAccXaxis].measurement = (axies_desc_lut[eAccXaxis].raw_value * 1.0 / 16384) - axies_desc_lut[eAccXaxis].error;
     axies_desc_lut[eAccYaxis].measurement = (axies_desc_lut[eAccYaxis].raw_value * 1.0 / 16384) - axies_desc_lut[eAccYaxis].error;
@@ -171,6 +170,11 @@ bool ACC_API_KalmanFiltering(){
     //calculate full acceleration 
     Raw=axies_desc_lut[eAccXaxis].measurement*axies_desc_lut[eAccXaxis].measurement+axies_desc_lut[eAccYaxis].measurement*axies_desc_lut[eAccYaxis].measurement+axies_desc_lut[eAccZaxis].measurement*axies_desc_lut[eAccZaxis].measurement;
     Raw=sqrt(Raw)-1;
+
+    if (Raw>0.8){
+
+    	__NOP();
+    }
     //calibrating ()
     if (config_flag < 1000) {
         Xaxis_conv_sum += axies_desc_lut[eAccXaxis].measurement;
@@ -181,8 +185,8 @@ bool ACC_API_KalmanFiltering(){
     //calculating offset
     if (config_flag >= 1000) {
         axies_desc_lut[eAccXaxis].error = Xaxis_conv_sum / 1000;
-        axies_desc_lut[eAccYaxis].error = Yaxis_conv_sum / 1000;
-        axies_desc_lut[eAccZaxis].error = Zaxis_conv_sum / 1000 -1;
+        axies_desc_lut[eAccYaxis].error = Yaxis_conv_sum / 1000 - 1;
+        axies_desc_lut[eAccZaxis].error = Zaxis_conv_sum / 1000;
         acce_status |= ACCE_CALIBRATED;
     }
     //kalman filter
@@ -233,7 +237,7 @@ bool ACC_API_KalmanFiltering(){
         acceleration = sqrt(acceleration) - 1;
         }
         
-        
+       return true;
 
 }
 
@@ -245,9 +249,9 @@ bool ACC_API_KalmanFiltering(){
         //blocking if using interupt
         static uint8_t first_start = 0; 
 
-        if (acce_status & ACCE_ACCE_ENABLE == 0) { 
+        if ((acce_status & ACCE_ENABLE) == 0) {
             if (first_start != 1) first_start = 1; 
-            acceleration /= measures; 
+            average_acceleration = acceleration_buf / measures;
             measures = 0; 
             acceleration_buf = 0;
             ACC_API_Suspend();
@@ -265,7 +269,7 @@ bool ACC_API_KalmanFiltering(){
         ACC_API_ReadAllAcceleration();
 
         ACC_API_KalmanFiltering(); 
-        acceleration_buf+=acceleration; 
+        (acceleration<0) ? (acceleration_buf-=acceleration) : (acceleration_buf+=acceleration);
         measures++; 
 
 
@@ -320,5 +324,14 @@ bool ACC_API_Resume(){
     }
     osThreadResume(acce_thread_id);
     return true;
+}
+
+
+bool ACC_API_Suspend() {
+	if (osThreadGetState(acce_thread_id) == osThreadBlocked){
+		return true;
+	}
+	osThreadSuspend(acce_thread_id);
+	return true;
 }
 
