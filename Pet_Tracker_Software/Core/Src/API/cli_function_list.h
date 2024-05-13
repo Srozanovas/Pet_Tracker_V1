@@ -73,8 +73,27 @@ typedef enum eMiscCommands_t{
     eMiscCommandsWritePin = eMiscCommandsFirst, 
     eMiscCommandsTogglePin, 
     eMiscCommandsInitPin, 
+    eMiscCommandsSave, 
+    eMiscCommandsLog,
     eMiscCommandsLast
 }eMiscCommands_t;
+
+typedef enum eMiscOptions_t{ 
+    eOptionsFirst = 0,
+    eOptionsAGPSEnable = eOptionsFirst,
+    eOptionsNormalCount, 
+    eOptionsPowerSaveCount,
+    eOptionsMode,
+    eOptionsAPN, 
+    eOptionsPhoneBook, 
+
+    eOptionsLast
+
+}eMiscOptions_t;
+
+
+uint8_t ParseToSymbol(char *text, char *parsed, char symbol);
+
 
 
 

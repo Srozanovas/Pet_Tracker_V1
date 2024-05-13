@@ -182,6 +182,7 @@ void UART_API_Thread (void *argument) {
                         break;
                     }
                 }
+
                 case eUartStateSend:
                 	uart_data.buffer_adress = (char*)uart_buffer_lut[uart].buffer;
                 	uart_data.size = uart_buffer_lut[uart].index;

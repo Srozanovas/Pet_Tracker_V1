@@ -169,12 +169,7 @@ bool ACC_API_KalmanFiltering(){
 
     //calculate full acceleration 
     Raw=axies_desc_lut[eAccXaxis].measurement*axies_desc_lut[eAccXaxis].measurement+axies_desc_lut[eAccYaxis].measurement*axies_desc_lut[eAccYaxis].measurement+axies_desc_lut[eAccZaxis].measurement*axies_desc_lut[eAccZaxis].measurement;
-    Raw=sqrt(Raw)-1;
 
-    if (Raw>0.8){
-
-    	__NOP();
-    }
     //calibrating ()
     if (config_flag < 1000) {
         Xaxis_conv_sum += axies_desc_lut[eAccXaxis].measurement;

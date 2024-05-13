@@ -53,6 +53,10 @@ extern uint8_t acce_status;
 extern uint8_t acce_options;
 extern float acceleration;
 extern float average_acceleration;
+extern uint8_t pet_tracker_mode; 
+extern uint16_t normal_mode_time;
+extern uint16_t power_save_mode_time;
+extern uint8_t pet_tracker_mode;
 
 #define EPO_DOWNLOAD_LINK "http://wepodownload.mediatek.com/EPO_GPS_3_1.DAT"
 
@@ -95,13 +99,16 @@ extern float average_acceleration;
 #define V4_POWER_ON			    (1U<<5)
 #define WAITING_FOR_MESSAGE (1U<<6)
 #define MODEM_INITIALISED   (1U<<7)
+#define TRACKER_ON          (1U<<8)
+
 
 //PET_TRACKER_OPTIONS 
 
-#define AGPS_ENABLE     (1U<<0)
-#define DEBUG_ENABLE    (1U<<1)
-#define FULL_DEBUG      (1U<<2)
-#define GNSS_FULL_PARSE (1U<<3)
+#define AGPS_ENABLE       (1U<<0)
+#define DEBUG_ENABLE      (1U<<1)
+#define FULL_DEBUG        (1U<<2)
+#define GNSS_FULL_PARSE   (1U<<3)
+
 
 //ACCE flags
 #define ACCE_ENABLE     (1U<<0)
@@ -114,6 +121,13 @@ extern float average_acceleration;
 
 #define GNSS_FIX_COMPLETE       (1U<<0)
 #define EPO_DOWNLOAD_COMPLETE   (1U<<1)
+
+
+#define PET_TRACKER_MODE_NORMAL 0
+#define PET_TRACKER_MODE_POWER_SAVE 1
+
+#define EEPROM_OPTIONS   eEepromAT24C256A0
+#define EEPROM_GPS       eEepromAT24C256A1
 
 /* USER CODE END Includes */
 

@@ -1,6 +1,6 @@
 ../Core/Src/API/eeprom_api.c:18:6:EEPROM_API_Init	8	static
-../Core/Src/API/eeprom_api.c:25:6:EEPROM_API_SendByte	24	static
-../Core/Src/API/eeprom_api.c:30:6:EEPROM_API_ReadByte	24	static
-../Core/Src/API/eeprom_api.c:35:6:EEPROM_API_SendBuffer	24	static
-../Core/Src/API/eeprom_api.c:43:6:EEPROM_API_EraseSector	24	static
-../Core/Src/API/eeprom_api.c:51:6:EEPROM_API_ReadBuffer	24	static
+../Core/Src/API/eeprom_api.c:26:6:EEPROM_API_SendByte	24	static
+../Core/Src/API/eeprom_api.c:31:6:EEPROM_API_ReadByte	24	static
+../Core/Src/API/eeprom_api.c:36:6:EEPROM_API_SendBuffer	24	static
+../Core/Src/API/eeprom_api.c:44:6:EEPROM_API_EraseSector	24	static
+../Core/Src/API/eeprom_api.c:52:6:EEPROM_API_ReadBuffer	24	static

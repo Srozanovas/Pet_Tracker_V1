@@ -5,6 +5,9 @@
 #include "gpio_driver.h"
 #include "string.h"
 #include "stdlib.h"
+#include "eeprom_api.h"
+#include "uart_api.h"
+#include "stdio.h"
 
 
 #include "modem_api.h"
@@ -12,10 +15,11 @@
 
 
 
-bool Misc_Command_WritePin(char * params);
-bool Misc_Command_InitPin(char * params);
-bool Misc_Command_TogglePin(char * params);
-
+bool Misc_Command_WritePin(char *params);
+bool Misc_Command_InitPin(char *params);
+bool Misc_Command_TogglePin(char *params);
+bool Misc_Command_LOG(char *params);
+bool Misc_Command_OptionsSave(char *params);
 
 
 
@@ -49,10 +53,17 @@ const sCommandFunctions_t eeprom_command_function_lut[eEEPROMCommandsLast]={
 };
 
 const sCommandFunctions_t misc_command_function_lut[eMiscCommandsLast] = { 
-	[eMiscCommandsWritePin] 	= {.name = "WRITEPIN", .function_pointer = &Misc_Command_WritePin}, 
-	[eMiscCommandsInitPin]		= {.name = "INITPIN", .function_pointer = &Misc_Command_InitPin}, 
-	[eMiscCommandsTogglePin] 	= {.name = "TOGGLEPIN", .function_pointer = &Misc_Command_TogglePin}, 
+	[eMiscCommandsWritePin] 	= {.name = "WRITEPIN", 		.function_pointer = &Misc_Command_WritePin}, 
+	[eMiscCommandsInitPin]		= {.name = "INITPIN", 		.function_pointer = &Misc_Command_InitPin}, 
+	[eMiscCommandsTogglePin] 	= {.name = "TOGGLEPIN", 	.function_pointer = &Misc_Command_TogglePin}, 
+	[eMiscCommandsSave]			= {.name = "OPTIONSSAVE", 	.function_pointer = &Misc_Command_OptionsSave}, 
+	[eMiscCommandsLog]			= {.name = "LOG", 			.function_pointer = &Misc_Command_LOG},
 };
+
+
+
+
+
 
 
 
@@ -134,57 +145,88 @@ bool Misc_Command_TogglePin (char *params){
 }
 
 
+bool Misc_Command_LOG(char *params){
+	uint8_t log_tx[100];
+	snprintf(log_tx,24, "Number Of fixes: %d\n", num_of_fixes); 
+	UART_API_SendString(eUartDebug, (char*)log_tx, 20);
 
-// bool CMD_API_ModemSendCommand (sCommandResponse_t *command_response) {
-//     if (Modem_API_SendCommand(command_response->message_args, command_response->args_length) == false) {
-//         snprintf(command_response->response_buffer,ERROR_BUFFER_SIZE, "Can't send command to modem");
-//         return false;
-//     }
-//     return true;
-// }
+	for (int i=1; i<=num_of_fixes; i++){
+		EEPROM_API_ReadBuffer(eEepromAT24C256A1, (i-1)*33, (uint8_t*)latitude, 8);
+		EEPROM_API_ReadBuffer(eEepromAT24C256A1, (i-1)*33+8, (uint8_t*)longitude, 8);
+		EEPROM_API_ReadBuffer(eEepromAT24C256A1, (i-1)*33+16, (uint8_t*)time_of_fix, 17);
+		snprintf((char*)log_tx, 100, "Time: %s, lattitude: %s, longitude: %s\n", time_of_fix, latitude, longitude);
+		UART_API_SendString(eUartDebug, (char*)log_tx, 100);
+	}
 
-// bool CMD_API_ModemSendSMS (sCommandResponse_t *command_response) {
-//     message_sent_flag = 0;
-//     uint16_t size = 0;
-//     char *buffer = NULL;
-//     char *number = NULL;
-//     number = strtok(command_response->message_args, ",");
-//     size = strnlen(number,MAX_LENGTH)-1;
-//     if (number == NULL || size == MAX_LENGTH || size == 0){
-//         snprintf(command_response->response_buffer, ERROR_BUFFER_SIZE, "Didn't receive number\n");
-//         return false;
-//     }
-//     buffer = number + size +2;
-//     size = strnlen(buffer, MAX_LENGTH)-1;
-//     if (buffer == NULL || size == MAX_LENGTH-1 || size == 0) {
-//         snprintf(command_response->response_buffer, ERROR_BUFFER_SIZE, "Didn't receive text\n");
-//         return false;
-//     }
-//     if (Modem_API_SendSMS(number, buffer, size, command_response->response_buffer) != true) {
+	return true;
+}
+bool Misc_Command_OptionsSave(char *params){
+	uint8_t options[100]={0};
+	uint16_t length = ParseToSymbol(params, options, ',');
+	uint8_t length_copy = length;
+	if (length == 255) return false;  
+	if (length == 1) length = options[0] - '0'; 
+	else if (length == 2) length = 10*(options[0] - '0') + (options[1] - '0');
+	else if (length == 3) length = 100*(options[0] - '0') + 10*(options[1] - '0') + options[2] - '0';
+	if (length > eOptionsLast) return false; 
+	switch ((eMiscOptions_t) (length)){
+		case eOptionsMode:{
+			if (params[length_copy+1] == '0'){
+			    pet_tracker_mode = PET_TRACKER_MODE_NORMAL;
+			}
+			else if ((params[length_copy+1] == '1')) pet_tracker_mode = PET_TRACKER_MODE_POWER_SAVE;
+			if ((params[length_copy+1] == '0') || (params[length_copy+1] == '1'))
+			    EEPROM_API_SendByte(EEPROM_OPTIONS, EE_PET_TRACKER_MODE_8B, pet_tracker_mode);
 
-//         return false;
-//     }
-//     message_sent_flag = 1;
-//     return true;
-// }
+			break;
+		}
+		case eOptionsNormalCount:{
+		    length = ParseToSymbol(params+length_copy+1, options, '\n');
+		    if (length == 1) length = options[0] - '0';
+		    else if (length == 2) length = 10*(options[0] - '0') + (options[1] - '0');
+		    else if (length == 3) length = 100*(options[0] - '0') + 10*(options[1] - '0') + options[2] - '0';
+            else if (length == 4) length = 1000*(options[0] - '0') + 100*(options[1] - '0') + 10*(options[2] - '0') + (options[3] - '0');
+		    if ((length>1400) || (length<1)) return false;
+		    else {
+		        normal_mode_time = length*2;
+		        EEPROM_API_SendBuffer(EEPROM_OPTIONS, EE_PET_TRACKER_FIX_FREQ_NM_16B, (uint8_t*)&normal_mode_time, 2);
+		    }
+		    break;
+		}
+		case eOptionsPowerSaveCount:{
+		    length = ParseToSymbol(params+length_copy+1, options, '\n');
+		    if (length == 1) length = options[0] - '0';
+		    else if (length == 2) length = 10*(options[0] - '0') + (options[1] - '0');
+		    else if (length == 3) length = 100*(options[0] - '0') + 10*(options[1] - '0') + options[2] - '0';
+		    else if (length == 4) length = 1000*(options[0] - '0') + 100*(options[1] - '0') + 10*(options[2] - '0') + (options[3] - '0');
+		    if ((length>1400) || (length<5)) return false;
+		    else {
+		        power_save_mode_time = length*2;
+		        EEPROM_API_SendBuffer(EEPROM_OPTIONS, EE_PET_TRACKER_FIX_FREQ_PSM_16B, (uint8_t*)&power_save_mode_time, 2);
+		    }
+		    break;
+		}
+		default:
+		break;
+	}
 
-// bool CMD_API_ModemReadSMS(sCommandResponse_t *command_response){
 
 
-// 	return true;
-// }
-
-// bool CMD_API_ModemConfig(sCommandResponse_t *command_response){
-//     ACC_API_Suspend();
-//     if (Modem_API_Config()!= true){
-//         Modem_API_Config();
-//     }
-//     ACC_API_Resume();
-
-//     return true;
-// }
+	return true;
+}
 
 
+//UTILITY 
 
-
-
+uint8_t ParseToSymbol(char *text, char *parsed, char symbol) {
+	uint8_t length = 0;
+	uint8_t start = 0;
+	for (int i = 0; i<255; i++){
+		if ((text[i] >= '0' && text[i] <= '9') || text[i] == '.' || text[i] == '\r') {
+			if (start == 0) start = 1; //number start
+			if (text[i] != 13) parsed[length++] = text[i];
+		} else if ((text[i] == symbol)) break; //number parsed succesfully
+		else if (start == 1) return 0xFF; //number is split or something wrong
+	}
+	return length;
+}

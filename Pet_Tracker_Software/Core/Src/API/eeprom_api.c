@@ -18,6 +18,7 @@ static sEepromDesc_t eeprom_desc_lut[] = {
 bool EEPROM_API_Init (void) {
     if (I2C_Driver_Init(eI2CEeprom) != true) {
         return false;
+
     }
     return true;
 }

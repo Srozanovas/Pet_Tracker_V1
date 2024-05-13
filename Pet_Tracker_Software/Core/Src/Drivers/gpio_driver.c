@@ -108,7 +108,7 @@ bool GPIO_Driver_Init (eGpioPin_t gpio_pin, eGpioPinState_t init_state) {  //GPI
     }
 
     //GPIO STRUCT FORMATION
-    if (gpio_pin != eGpioPinA1AcceInt)HAL_GPIO_WritePin(gpio_desc_lut[gpio_pin].port, gpio_desc_lut[gpio_pin].pin, GPIO_PIN_RESET);
+    //if (gpio_pin != eGpioPinA1AcceInt)HAL_GPIO_WritePin(gpio_desc_lut[gpio_pin].port, gpio_desc_lut[gpio_pin].pin, GPIO_PIN_RESET);
     
     gpio_init_struct.Pin = gpio_desc_lut[gpio_pin].pin;
     gpio_init_struct.Mode = gpio_desc_lut[gpio_pin].mode;
@@ -203,6 +203,7 @@ bool GPIO_Driver_InitAll (void) {   //INIT ALL PINS
 
 bool GPIO_Driver_AcceFlagFunc(bool (*func)(uint8_t flag)){ 
     acce_set_flag = func;
+    return true;
 }
 
 void EXTI1_IRQHandler(void)

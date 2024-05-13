@@ -95,7 +95,7 @@ void HardFault_Handler(void)
 	  HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_12);
 	  HAL_Delay(500);
 
-	  //if (i==10)NVIC_SystemReset();
+	  if (i==100)NVIC_SystemReset();
     /* USER CODE END W1_HardFault_IRQn 0 */
   }
 }

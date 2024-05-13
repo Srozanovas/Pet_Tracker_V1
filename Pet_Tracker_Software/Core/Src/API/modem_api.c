@@ -93,7 +93,7 @@ void Modem_API_MessageThread ();
 void Modem_API_AnswerThread();
 
 //UTILITY 
-uint8_t Modem_API_ParseToSymbol(char *text, char *parsed, char symbol);
+
 bool Modem_API_CleanBuffer(uint8_t *buf, uint16_t len);
 
 //RESPONSE 
@@ -104,6 +104,7 @@ bool Modem_API_AT_Response_CMTI(char *params);
 bool Modem_API_AT_Response_CMGR(char *params);
 bool Modem_API_AT_Response_NotParsed(char *params);
 bool Modem_API_AT_Response_CCLK(char *params);
+bool Modem_API_AT_Response_DST(char *params);
 
 //RTOS FUNCTIONS 
 bool Modem_API_Init(){ 
@@ -278,6 +279,7 @@ void Modem_API_AnswerThread(){
 				}
             	case eModemATDST:{
             		pet_tracker_status |= MODEM_INITIALISED;
+            		Modem_API_AT_Response_DST(parsed_message->command_answer);
 					break;
 				}
                 case eModemATLast:{
@@ -309,7 +311,7 @@ bool Modem_API_GetLocation(char *params){
     if (gnss_status & GNSS_FIX_COMPLETE != 0){ 
         snprintf(modem_tx,20,"AT+CCLK?\n");
         Modem_API_SendWait(modem_tx, eModemSendWaitFlagCustom, 1000, MODEM_OK|MODEM_ERROR);
-        if (num_of_fixes == 100) num_of_fixes = 0;
+        if (num_of_fixes == 1000) num_of_fixes = 0;
 
         EEPROM_API_SendBuffer(eEepromAT24C256A1, num_of_fixes*33, latitude, 8);
         EEPROM_API_SendBuffer(eEepromAT24C256A1, num_of_fixes*33+8, longitude, 8);
@@ -385,7 +387,7 @@ bool Modem_API_GNSS_Power(char *params){
     char power[3]={0};
     char modem_tx[20]={0};
     uint32_t flags=0; 
-    i = Modem_API_ParseToSymbol(params, power, '\n' );
+    i = ParseToSymbol(params, power, '\n' );
     if (i == 0) return false; 
     if (((power[0]-'0') == 1) || ((power[0]-'0') == 0)){
     	power[0] -= '0';
@@ -511,7 +513,7 @@ bool Modem_API_ReadSMS(char *params){
 
 bool Modem_API_DeleteSMS(char *params){
     char temp[5]; 
-    uint8_t length = Modem_API_ParseToSymbol((params), temp, '\n');
+    uint8_t length = ParseToSymbol((params), temp, '\n');
     if (length == 1) length = temp[0] - '0';
     else if (length == 2) length = 10*(temp[0] - '0') + (temp[1] - '0');
     else if (length == 3) length = 100*(temp[0] - '0') + 10*(temp[1] - '0') + (temp[2] - '0');
@@ -528,7 +530,7 @@ bool Modem_API_DeleteSMS(char *params){
 bool Modem_API_SendLocation(char *params){ 
     char temp[5];
     char message_text[100]={0};
-    uint8_t length = Modem_API_ParseToSymbol((params), temp, '\n');
+    uint8_t length = ParseToSymbol((params), temp, '\n');
     if (length == 1) length = temp[0] - '0';
     else if (length == 2) length = 10*(temp[0] - '0') + (temp[1] - '0');
     else return false;
@@ -562,7 +564,7 @@ bool Modem_API_AT_Response_CGNSCHK(char *params){
     /*should send something like this 3,1,27456,xx  3 is to indicate epo
      1 is epo exists 0 doesnt exists, next is size last one is available hours*/
     //epo file parse
-    length = Modem_API_ParseToSymbol((params+i), temp, ',');
+    length = ParseToSymbol((params+i), temp, ',');
     if (temp[0]-'0' != 3){
     	epo_file_status = 0;
     	return false; // somethings wrong no file
@@ -572,7 +574,7 @@ bool Modem_API_AT_Response_CGNSCHK(char *params){
 
 
     //exist or not
-    length = Modem_API_ParseToSymbol((params+i), temp, ',');
+    length = ParseToSymbol((params+i), temp, ',');
     if (temp[0]-'0' != 1){
         epo_file_status = 0;
         return true; // no epo file, need to download
@@ -581,10 +583,10 @@ bool Modem_API_AT_Response_CGNSCHK(char *params){
     i+=length+1;
 
     //size - doesnt matter
-    length = Modem_API_ParseToSymbol((params+i), temp, ',');
+    length = ParseToSymbol((params+i), temp, ',');
     Modem_API_CleanBuffer((uint8_t*)temp, 10);
-
-    length = Modem_API_ParseToSymbol((params+i), temp, ',');
+    i+=length+1;
+    length = ParseToSymbol((params+i), temp, ',');
     (temp[0] > '0') ?  (temp[0]-='0') : (temp[0] = 0);
     (temp[1] > '0') ?  (temp[1]-='0') : (temp[1] = 0);
     uint8_t hours = temp[0]*10+temp[1];
@@ -603,11 +605,11 @@ bool Modem_API_AT_Response_CGNSINF(char*params){
 	char temp[20] = {0};
 	uint8_t i=1;
 	uint8_t length=0;
-	length = Modem_API_ParseToSymbol((params+i), temp, ',');
+	length = ParseToSymbol((params+i), temp, ',');
     if (length == 255) return true;
 	i+=length+1;
     Modem_API_CleanBuffer((uint8_t*)temp, 20);
-	length = Modem_API_ParseToSymbol((params+i), temp, ',');
+	length = ParseToSymbol((params+i), temp, ',');
     if (length == 255) return true;
     if (temp[0] == '0'){
     	gnss_status &= ~GNSS_FIX_COMPLETE;//clear gnss  fix flag
@@ -624,17 +626,17 @@ bool Modem_API_AT_Response_CGNSINF(char*params){
 
 		i+=length+1;
 		Modem_API_CleanBuffer((uint8_t*)temp, 20);
-		length = Modem_API_ParseToSymbol((params+i), temp, ',');
+		length = ParseToSymbol((params+i), temp, ',');
 		if (length == 255) return true;
 		i+=length+1;
 
 		Modem_API_CleanBuffer((uint8_t*)temp, 20);
-		length = Modem_API_ParseToSymbol((params+i), temp, ',');
+		length = ParseToSymbol((params+i), temp, ',');
 		if (length == 255) return true;
 		snprintf(latitude, length, temp);
 		i+=length+1;
  		Modem_API_CleanBuffer((uint8_t*)temp, 20);
-		length = Modem_API_ParseToSymbol((params+i), temp, ',');
+		length = ParseToSymbol((params+i), temp, ',');
 		if (length == 255) return true;
 		snprintf(longitude, length, temp);
     }
@@ -669,14 +671,19 @@ bool Modem_API_AT_Response_CMTI(char *params){
 		}
 	}
 
-	if (sms_index == 1) sms_id = (sms[0] - '0');
-	if (sms_index == 2) sms_id = (((sms[0] - '0')*10) + (sms[1] - '0'));
+	if (sms_index == 1){
+	    sms_id = (sms[0] - '0');
+	    sms[1]='\n';
+	}
+	if (sms_index == 2){
+	    sms_id = (((sms[0] - '0')*10) + (sms[1] - '0'));
+	    sms[2]='\n';
+	}
 
 
 
-    char *command = calloc(20, sizeof(char));
-    CMD_API_PuttoQueue(eCommandModulesModem,eModemCommandsReadSMS, command, 20);
-    free (command);
+
+    CMD_API_PuttoQueue(eCommandModulesModem,eModemCommandsReadSMS, sms, 20);
 	return true;
 }
 
@@ -713,7 +720,15 @@ bool Modem_API_AT_Response_CCLK(char *params){
     return true;
 }
 
+bool Modem_API_AT_Response_DST(char *params){
 
+
+
+    CMD_API_PuttoQueue(eCommandModulesModem, eModemCommandsDeleteSMS, "255\n", 5);
+
+
+    return true;
+}
 //UTILITY-----------------------------------------------------------------------
 
 uint32_t Modem_API_SendWait(char * params, eModemSendWait modem_wait, ...){
@@ -768,18 +783,7 @@ uint32_t Modem_API_SendWait(char * params, eModemSendWait modem_wait, ...){
 }
 
 
-uint8_t Modem_API_ParseToSymbol(char *text, char *parsed, char symbol) {
-	uint8_t length = 0;
-	uint8_t start = 0;
-	for (int i = 0; i<255; i++){
-		if ((text[i] >= '0' && text[i] <= '9') || text[i] == '.' || text[i] == '\r') {
-			if (start == 0) start = 1; //number start
-			if (text[i] != 13) parsed[length++] = text[i];
-		} else if ((text[i] == symbol)) break; //number parsed succesfully
-		else if (start == 1) return 0xFF; //number is split or something wrong
-	}
-	return length;
-}
+
 
 
 bool Modem_API_CleanBuffer(uint8_t *buf, uint16_t len) {
