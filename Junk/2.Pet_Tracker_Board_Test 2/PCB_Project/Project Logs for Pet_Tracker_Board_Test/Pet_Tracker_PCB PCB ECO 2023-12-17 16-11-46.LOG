@@ -1,4 +1,0 @@
-Added Member To Class: ClassName=Modem Member=Component E1 GNSS_ANTENNA_SMD
-Added Member To Class: ClassName=Modem Member=Component U2 GPRS,GSM,GNSS Modem
-Added Room: Name=Modem
-Added Room: Name=Schematic

@@ -1,8 +1,0 @@
-Change Component Description : Designator=J1 Old Description=c New Description=CONNECTOR, MINI SIM, 6PIN, COVER
-
-https://lt.farnell.com/multicomp/simmp-00601b201-g/connector-mini-sim-6pin-cover/dp/2211807?st=sim+card+
-Added Pin To Net: NetName=NetD2_1 Pin=R1-1
-Added Pin To Net: NetName=NetD3_1 Pin=R2-1
-Added Pin To Net: NetName=NetD4_1 Pin=R3-1
-Added Room: Name=Modem
-Added Room: Name=Schematic

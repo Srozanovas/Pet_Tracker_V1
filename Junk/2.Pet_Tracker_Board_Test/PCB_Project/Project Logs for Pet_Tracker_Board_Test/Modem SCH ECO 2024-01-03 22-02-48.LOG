@@ -1,5 +1,0 @@
-Remove Pin=J1-C1 From Net=SIM_VCC
-Remove Pin=J1-C2 From Net=SIM_RESET
-Remove Pin=J1-C3 From Net=SIM_CLOCK
-Remove Pin=J1-C6 From Net=SIM_VPP
-Remove Pin=J1-C7 From Net=SIM_DATA

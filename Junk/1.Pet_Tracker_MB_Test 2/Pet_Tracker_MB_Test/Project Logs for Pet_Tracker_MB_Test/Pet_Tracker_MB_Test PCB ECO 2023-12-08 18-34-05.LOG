@@ -1,6 +1,0 @@
-Removed Pin From Net: NetName=NetC7_2 Pin=D5-2
-Removed Member From Class: ClassName=Power_Schematic Member=D5
-Removed Member From Class: ClassName=Power_Schematic Member=R1
-Added Member To Class: ClassName=Power_Schematic Member=Component Q2 MOSFET Pch -45V -4.5A
-Added Room: Name=Power_Schematic
-Added Room: Name=STM
