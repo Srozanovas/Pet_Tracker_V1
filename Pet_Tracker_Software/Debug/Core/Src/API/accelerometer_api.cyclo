@@ -1,0 +1,10 @@
+../Core/Src/API/accelerometer_api.c:118:6:ACC_API_Init	7
+../Core/Src/API/accelerometer_api.c:159:6:ACC_API_KalmanFiltering	4
+../Core/Src/API/accelerometer_api.c:242:7:ACC_API_Thread	7
+../Core/Src/API/accelerometer_api.c:280:6:ACC_API_WriteRegister	1
+../Core/Src/API/accelerometer_api.c:285:6:ACC_API_ReadRegister	1
+../Core/Src/API/accelerometer_api.c:292:6:ACC_API_RaiseFlag	1
+../Core/Src/API/accelerometer_api.c:297:6:ACC_API_WaitFlag	2
+../Core/Src/API/accelerometer_api.c:305:6:ACC_API_ReadAllAcceleration	1
+../Core/Src/API/accelerometer_api.c:315:6:ACC_API_Resume	3
+../Core/Src/API/accelerometer_api.c:325:6:ACC_API_Suspend	2

@@ -1,0 +1,25 @@
+Added Component: Designator=J1(MICROSIM)
+Add component (AddParameter): Name = "Availability"; Value = "In Stock"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Check_prices"; Value = "https://www.snapeda.com/parts/78646-3001/Molex/view-part/?ref=eda"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "MF"; Value = "Molex"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "MP"; Value = "78646-3001"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Package"; Value = "None"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Price"; Value = "None"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "SnapEDA_Link"; Value = "https://www.snapeda.com/parts/78646-3001/Molex/view-part/?ref=snap"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Value"; Value = ""; VariantName = "[No Variations]"
+Added Pin To Net: NetName=SIM_VCC Pin=J1-C1
+Added Pin To Net: NetName=SIM_RESET Pin=J1-C2
+Added Pin To Net: NetName=SIM_CLOCK Pin=J1-C3
+Added Pin To Net: NetName=GND Pin=J1-C5
+Added Pin To Net: NetName=SIM_DATA Pin=J1-C7
+Added Pin To Net: NetName=GND Pin=J1-G1
+Added Pin To Net: NetName=GND Pin=J1-G2
+Added Pin To Net: NetName=GND Pin=J1-G3
+Added Pin To Net: NetName=GND Pin=J1-G4
+Added Pin To Net: NetName=GND Pin=J1-G5
+Added Pin To Net: NetName=GND Pin=J1-G6
+Change Net Name : Old Net Name=GSM_PW New Net Name=GSM_PWRKEY
+Change Net Name : Old Net Name=NetR1_1 New Net Name=PA5
+Added Member To Class: ClassName=Modem Member=Component J1 MICROSIM
+Added Room: Name=Modem
+Added Room: Name=Schematic
