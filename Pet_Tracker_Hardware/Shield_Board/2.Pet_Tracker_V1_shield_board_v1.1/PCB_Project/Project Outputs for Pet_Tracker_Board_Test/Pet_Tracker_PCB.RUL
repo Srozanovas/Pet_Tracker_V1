@@ -1,0 +1,6 @@
+DRC Rules Export File for PCB: D:\Altiumo_Projektai\3. Pet_Tracker\Final\Pet_Tracker\Junk\2.Pet_Tracker_Board_Test\PCB_Project\Pet_Tracker_PCB.PcbDoc
+RuleKind=Width|RuleName=RF50|Scope=Board|Minimum=6.23
+RuleKind=SolderMaskExpansion|RuleName=SolderMaskExpansion|Scope=Board|Minimum=4.00
+RuleKind=Width|RuleName=Width|Scope=Board|Minimum=5.91
+RuleKind=Clearance|RuleName=Clearance|Scope=Board|Minimum=10.00
+RuleKind=ShortCircuit|RuleName=ShortCircuit|Scope=Board|Allowed=0
