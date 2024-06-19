@@ -1,3 +1,0 @@
-../Core/Src/Utility/ring_buffer.c:21:6:RingBuffer_Init	3
-../Core/Src/Utility/ring_buffer.c:39:6:RingBuffer_Get	5
-../Core/Src/Utility/ring_buffer.c:59:6:RingBuffer_Put	4

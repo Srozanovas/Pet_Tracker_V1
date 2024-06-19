@@ -1,5 +1,0 @@
-../Core/Src/API/power_api.c:5:9:POWER_API_ParseLevel	24	static
-../Core/Src/API/power_api.c:24:6:POWER_API_PinControl	16	static
-../Core/Src/API/power_api.c:56:6:POWER_API_LEDPower	16	static
-../Core/Src/API/power_api.c:60:6:POWER_API_4VPower	24	static
-../Core/Src/API/power_api.c:70:6:POWER_API_ModemPower	24	static

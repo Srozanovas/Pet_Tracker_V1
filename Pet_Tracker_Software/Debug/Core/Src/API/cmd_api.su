@@ -1,3 +1,0 @@
-../Core/Src/API/cmd_api.c:20:6:CMD_API_Thread	16	static
-../Core/Src/API/cmd_api.c:28:6:CMD_API_ThreadInit	8	static
-../Core/Src/API/cmd_api.c:34:6:CMD_API_MessageCut	16	static
