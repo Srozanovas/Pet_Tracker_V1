@@ -1,21 +1,27 @@
-Pet_Tracker_Hardware\Main_Board\1.Pet_Tracker_V1_main_board_v1.0\Pet_Tracker_MB_Test\Project Outputs for Pet_Tracker_MB_Test\.
-Pet_Tracker_Hardware\Main_Board\1.Pet_Tracker_V1_main_board_v1.0\Pet_Tracker_MB_Test\History\.
-Pet_Tracker_Hardware\Main_Board\1.Pet_Tracker_V1_main_board_v1.0\__Previews\.
+/Pet_Tracker_Hardware/Main_Board/1.Pet_Tracker_V1_main_board_v1.0/Pet_Tracker_MB_Test/Project Outputs for Pet_Tracker_MB_Test/**
+/Pet_Tracker_Hardware/Main_Board/1.Pet_Tracker_V1_main_board_v1.0/Pet_Tracker_MB_Test/History/**
+/Pet_Tracker_Hardware/Main_Board/1.Pet_Tracker_V1_main_board_v1.0/__Previews/**
 
-Pet_Tracker_Hardware\Main_Board\1.Pet_Tracker_V1_main_board_v1.1\Pet_Tracker_MB_Test\Project Outputs for Pet_Tracker_MB_Test\.
-Pet_Tracker_Hardware\Main_Board\1.Pet_Tracker_V1_main_board_v1.1\Pet_Tracker_MB_Test\History\.
-Pet_Tracker_Hardware\Main_Board\2.Pet_Tracker_V1_main_board_v1.1\__Previews\.
+/Pet_Tracker_Hardware/Main_Board/2.Pet_Tracker_V1_main_board_v1.1/Pet_Tracker_MB_Test/Project Outputs for Pet_Tracker_MB_Test/**
+/Pet_Tracker_Hardware/Main_Board/2.Pet_Tracker_V1_main_board_v1.1/Pet_Tracker_MB_Test/History/**
+/Pet_Tracker_Hardware/Main_Board/2.Pet_Tracker_V1_main_board_v1.1/__Previews/**
 
-Pet_Tracker_Hardware\Shield_Board\1.Pet_Tracker_V1_shield_board_v1.0\PCB_Project\__Previews\.
-Pet_Tracker_Hardware\Shield_Board\1.Pet_Tracker_V1_shield_board_v1.0\PCB_Project\History\.
-Pet_Tracker_Hardware\Shield_Board\1.Pet_Tracker_V1_shield_board_v1.0\PCB_Project\Project Outputs for Pet_Tracker_Board_Test\.
+/Pet_Tracker_Hardware/Shield_Board/1.Pet_Tracker_V1_shield_board_v1.0/PCB_Project/__Previews/**
+/Pet_Tracker_Hardware/Shield_Board/1.Pet_Tracker_V1_shield_board_v1.0/PCB_Project/History/**
+/Pet_Tracker_Hardware/Shield_Board/1.Pet_Tracker_V1_shield_board_v1.0/PCB_Project/Project Outputs for Pet_Tracker_Board_Test/**
 
-Pet_Tracker_Hardware\Shield_Board\2.Pet_Tracker_V1_shield_board_v1.1\PCB_Project\__Previews\.
-Pet_Tracker_Hardware\Shield_Board\2.Pet_Tracker_V1_shield_board_v1.1\PCB_Project\History\.
-Pet_Tracker_Hardware\Shield_Board\2.Pet_Tracker_V1_shield_board_v1.1\PCB_Project\Project Outputs for Pet_Tracker_Board_Test\.
+/Pet_Tracker_Hardware/Shield_Board/2.Pet_Tracker_V1_shield_board_v1.1/PCB_Project/__Previews/**
+/Pet_Tracker_Hardware/Shield_Board/2.Pet_Tracker_V1_shield_board_v1.1/PCB_Project/History/**
+/Pet_Tracker_Hardware/Shield_Board/2.Pet_Tracker_V1_shield_board_v1.1/PCB_Project/Project Outputs for Pet_Tracker_Board_Test/**
 
 
-
+Pet_Tracker_Software/.metadata/**
+Pet_Tracker_Software/.settings/**
+Pet_Tracker_Software/.vs/**
+Pet_Tracker_Software/.vscode/**
+Pet_Tracker_Software/build/**
+Pet_Tracker_Software/cmake/**
+Pet_Tracker_Software/Debug/**
 
 
 
